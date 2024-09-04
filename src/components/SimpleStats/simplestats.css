@@ -1,0 +1,23 @@
+
+.simple-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+}
+
+.stat {
+  width: 8em;
+  height: 4em;
+  border: 1px black solid;
+  border-radius: 25px;
+  display: grid;
+  place-items: center;
+  grid-template-rows: 1fr 1fr;
+  padding: 0 0 0.5em;
+}
+
+.stat-metric {
+  font-size: 2em;
+  font-weight: 400;
+}
