@@ -13,12 +13,8 @@ export default function Dashboard() {
   const [districts,setDistricts] = useState([]);
   const [selectedCity, setSelectedCity] = useState("Surat");
   const [dashboardData,setDashboardData] = useState(null)
-  const [gaugeValue,setGaugeValue] = useState([
-    ["Label","Value"]
-  ])
-  const [pieValue,setPieValue] = useState([
-    ["Task", "Hours per Day"]
-  ])
+  const [gaugeValue,setGaugeValue] = useState([])
+  const [pieValue,setPieValue] = useState([])
   const [stackedBarChart,setStackedBarChart] = useState([]);
   const [mapMarkerList,setmapMarkerList] = useState([]);
 
@@ -29,19 +25,31 @@ export default function Dashboard() {
       console.log(json);
       setDashboardData({...json});
       
+      // Setting Gauge Value
+      const gaugeInitialValue = [["Label","value"]]
+      setGaugeValue([...gaugeInitialValue]);
+
       const inaugrationValue = ['Inaugration',parseInt((json.inaugrationCount/json.totalRecordCount) * 100)]
       const completionValue = ['Completion',parseInt((json.completionCount/json.totalRecordCount) * 100)]
 
-      setGaugeValue([...gaugeValue,inaugrationValue,completionValue])
-      //console.log([...gaugeValue,inaugrationValue,completionValue]);
+      setGaugeValue([...gaugeInitialValue,inaugrationValue,completionValue])
+      console.log(36,[...gaugeInitialValue,inaugrationValue,completionValue]);
 
-      const pieArray = []
+
+
+      const initialPieValue = [["Task", "Hours per Day"]];
+
       json.pieChart.forEach(values=>{
-        pieArray.push([values.TALUKA,values.count])
+        initialPieValue.push([values.TALUKA,values.count])
       })
 
-      console.log([...pieValue,...pieArray]);
-      setPieValue([...pieValue,...pieArray])
+      console.log([...initialPieValue]);
+      setPieValue([...initialPieValue]);
+
+
+
+
+
 
       const stackedBarChartValue = json.stackedBarChart;
 
@@ -61,7 +69,7 @@ export default function Dashboard() {
         result.push(row);
       });
     
-    //console.log(result);
+    console.log(72,result);
     setStackedBarChart([...result]);
 
     }
@@ -112,31 +120,42 @@ export default function Dashboard() {
        <div className="container" style={{padding:'25px'}}>
        
        <div style={{marginBottom:50}}>
-        <h1>Rainwater Harvesting For State Of Gujrat</h1>
-
-        <select style={{width:250}} onChange={(e) => { 
-          console.log(e.target.value);
-          setSelectedCity(e.target.value)
-          }} class="form-select" aria-label="Default select example">
-          <option selected>Please Select State</option>
-          {
-            districts.map((district,index)=>{
-              return (
-                <option key={index} value={district.DISTRICT}>{district.DISTRICT}</option>
-              )
-            })
-          }
-        </select>
+        <div className="row"> 
+          <div className="col-2">
+            <img
+              src="./logo.jpeg"
+              alt="Map of Surat"
+              style={{ height: "80px", width: "100%", objectFit: "contain",marginTop:10 }}
+            />
+          </div>
+          <div className="col-10">
+            <h1 style={{color:'#1ca1e4'}}>Rainwater Harvesting For State Of Gujarat</h1>
+            <select style={{width:250}} onChange={(e) => { 
+              console.log(e.target.value);
+              setSelectedCity(e.target.value)
+              }} class="form-select" aria-label="Default select example">
+              <option selected>Please Select District</option>
+              {
+                districts.map((district,index)=>{
+                  return (
+                    <option key={index} value={district.DISTRICT}>{district.DISTRICT}</option>
+                  )
+                })
+              }
+            </select>
+          </div>
+        </div>
+       
        </div>
        
        <div className="row">
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Total</div>
-                   <h3 class="card-title">88</h3>
+                   <h4 class="card-title">{dashboardData.totalRecordCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -146,12 +165,12 @@ export default function Dashboard() {
              </div>
          </div>
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Talukas</div>
-                   <h3 class="card-title">{dashboardData.totalRecordCount}</h3>
+                   <h4 class="card-title">{dashboardData.talukasCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -161,12 +180,12 @@ export default function Dashboard() {
              </div>
          </div>
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Villages</div>
-                   <h3 class="card-title">{dashboardData.villageCount}</h3>
+                   <h4 class="card-title">{dashboardData.villageCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -176,12 +195,12 @@ export default function Dashboard() {
              </div>
          </div>
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Target</div>
-                   <h3 class="card-title">88</h3>
+                   <h4 class="card-title">88</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -191,12 +210,12 @@ export default function Dashboard() {
              </div>
          </div>
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Inaugrations</div>
-                   <h3 class="card-title">{dashboardData.inaugrationCount}</h3>
+                   <h4 class="card-title">{dashboardData.inaugrationCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -206,12 +225,12 @@ export default function Dashboard() {
              </div>
          </div>
          <div className="col-2">
-           <div class="card" style={{width: '100%',height:125}}>
+           <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Completions</div>
-                   <h3 class="card-title">{dashboardData.completionCount}</h3>
+                   <h4 class="card-title">{dashboardData.completionCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -222,14 +241,14 @@ export default function Dashboard() {
          </div>
 
          <div className="col-12" style={{marginTop:10}}>
-           <div className="card">
+           <div className="card" style={{height:500}}>
              <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
                <Map
-               style={{ borderRadius: "20px",height:300 }}
-               defaultZoom={5}
+               style={{ borderRadius: "20px",height:500 }}
+               defaultZoom={7}
                defaultCenter={{
-                 lat: 20.5937,
-                 lng: 78.9629,
+                 lat: 22.6708,
+                 lng: 71.5724,
                }}
                gestureHandling={"greedy"}
                disableDefaultUI
@@ -302,6 +321,9 @@ export default function Dashboard() {
                }}
              />
            </div>
+         </div>
+         <div className="col-12" style={{marginTop:10}}>
+          <button type="button" class="btn btn-primary w-100">Create New Entry</button>
          </div>
        </div>
      </div>
