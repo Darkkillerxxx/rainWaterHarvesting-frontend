@@ -232,7 +232,7 @@ const Form = () => {
             </div>
           </div>
           <div className="form-group">
-            <label htmlFor="LOCATION">Address *</label>
+            <label htmlFor="LOCATION">Rain Water Harvesting Place *</label>
             <input
               id="LOCATION"
               name="LOCATION"
