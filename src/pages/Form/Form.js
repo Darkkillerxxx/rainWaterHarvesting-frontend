@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import "./Form.css";
+import { DotLoader } from "react-spinners";
 
 const Form = () => {
   const [DISTRICT, setDistrict] = useState(null);
@@ -131,6 +132,7 @@ const Form = () => {
     // //   console.log(`${key}: ${value}`);
     // // }
     setIsLoading(true);
+    setTimeout(()=>{},3000)
 
     const data = {
       DISTRICT,
@@ -154,11 +156,12 @@ const Form = () => {
       .then((res) => {
         alert("Successfully added to the table");
         console.log("Successfully added to the table\nRes:", res);
+        setIsLoading(false);
       })
       .catch((e) => {
         console.log("Error:", e);
+        setIsLoading(false);
       });
-      setIsLoading(false);
   };
 
   return (
@@ -264,11 +267,11 @@ const Form = () => {
           </div>
           {
           isLoading ? 
-          <ClipLoader
-              color="#1ca1e4"
+          <DotLoader
+              color="#16d39a"
               loading={isLoading}
               cssOverride={override}
-              size={150}
+              size={30}
               aria-label="Loading Spinner"
               data-testid="loader"
             />
