@@ -8,8 +8,12 @@ import { RiRoadMapFill } from "react-icons/ri";
 import { TbTargetArrow } from "react-icons/tb";
 import { GiInauguration } from "react-icons/gi";
 import { FaRegThumbsUp } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom'
+
 
 export default function Dashboard() {
+  const navigate = useNavigate()
+
   const [districts,setDistricts] = useState([]);
   const [selectedCity, setSelectedCity] = useState("Surat");
   const [dashboardData,setDashboardData] = useState(null)
@@ -323,7 +327,7 @@ export default function Dashboard() {
            </div>
          </div>
          <div className="col-12" style={{marginTop:10}}>
-          <button type="button" class="btn btn-primary w-100">Create New Entry</button>
+          <button type="button" onClick={()=>navigate('/create')} class="btn btn-primary w-100">Create New Entry</button>
          </div>
        </div>
      </div>
