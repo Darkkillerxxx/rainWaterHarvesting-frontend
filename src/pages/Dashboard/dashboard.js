@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./dashboard.css";
 import { Chart } from "react-google-charts";
 import { Map, Marker, APIProvider } from "@vis.gl/react-google-maps";
@@ -10,6 +10,7 @@ import { GiInauguration } from "react-icons/gi";
 import { FaRegThumbsUp } from "react-icons/fa";
 
 export default function Dashboard() {
+  const [districts,setDistricts] = useState([]);
   const [selectedCity, setSelectedCity] = useState("Surat");
   const [dashboardData,setDashboardData] = useState(null)
   const [gaugeValue,setGaugeValue] = useState([
@@ -23,7 +24,7 @@ export default function Dashboard() {
 
   const fetchDashboardvalues = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=SURAT`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${selectedCity}`);
       const json = await response.json();
       console.log(json);
       setDashboardData({...json});
@@ -32,7 +33,7 @@ export default function Dashboard() {
       const completionValue = ['Completion',parseInt((json.completionCount/json.totalRecordCount) * 100)]
 
       setGaugeValue([...gaugeValue,inaugrationValue,completionValue])
-      console.log([...gaugeValue,inaugrationValue,completionValue]);
+      //console.log([...gaugeValue,inaugrationValue,completionValue]);
 
       const pieArray = []
       json.pieChart.forEach(values=>{
@@ -60,7 +61,7 @@ export default function Dashboard() {
         result.push(row);
       });
     
-    console.log(result);
+    //console.log(result);
     setStackedBarChart([...result]);
 
     }
@@ -71,9 +72,9 @@ export default function Dashboard() {
 
   const fetchMapMarkerLocations = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=SURAT`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${selectedCity}`);
       const json = await response.json();
-      console.log(json);
+      //console.log(json);
       
       if(json.code === 200){
         setmapMarkerList([...json.data])
@@ -81,19 +82,53 @@ export default function Dashboard() {
     }catch(error){
       throw error;
     }
-   
+  }
+
+  const fetchPicklistValues = async() =>{
+    try{
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllDistrics`);
+      const json = await response.json();
+      //console.log(json);
+      
+      if(json.code === 200){
+        setDistricts([...json.data])
+      }
+    }catch(error){
+      throw error;
+    }
   }
 
 
-  useState(()=>{
+  useEffect(()=>{
+    console.log(103);
     fetchDashboardvalues();
     fetchMapMarkerLocations();
-  },[])
+    fetchPicklistValues();
+  },[selectedCity])
   
   return (
     <>
     { dashboardData ? 
        <div className="container" style={{padding:'25px'}}>
+       
+       <div style={{marginBottom:50}}>
+        <h1>Rainwater Harvesting For State Of Gujrat</h1>
+
+        <select style={{width:250}} onChange={(e) => { 
+          console.log(e.target.value);
+          setSelectedCity(e.target.value)
+          }} class="form-select" aria-label="Default select example">
+          <option selected>Please Select State</option>
+          {
+            districts.map((district,index)=>{
+              return (
+                <option key={index} value={district.DISTRICT}>{district.DISTRICT}</option>
+              )
+            })
+          }
+        </select>
+       </div>
+       
        <div className="row">
          <div className="col-2">
            <div class="card" style={{width: '100%',height:125}}>
