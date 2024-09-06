@@ -176,82 +176,6 @@ export default function Dashboard() {
           </div>
         </div>
        </div>
-
-       <Carousel>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./1.jpg"
-              style={{height:500,width:'100%'}}
-              alt="First slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./2.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Second slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./3.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./4.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./5.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./6.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./7.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./8.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-          <Carousel.Item>
-            <img
-              className="d-block w-100"
-              src="./10.jpg"
-              style={{height:500,width:'100%'}}
-              alt="Third slide"
-            />
-          </Carousel.Item>
-        </Carousel>
-
        
        <div className="row" style={{marginTop:10}}>
          <div className="col-2">
@@ -346,29 +270,110 @@ export default function Dashboard() {
          </div>
 
          <div className="col-12" style={{marginTop:10}}>
-           <div className="card" style={{height:500}}>
-             <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
-               <Map
-               style={{ borderRadius: "20px",height:500 }}
-               defaultZoom={7}
-               defaultCenter={{
-                 lat: 22.6708,
-                 lng: 71.5724,
-               }}
-               gestureHandling={"greedy"}
-               disableDefaultUI
-               renderingType="RASTER"
-               >
-                {
-                  mapMarkerList.map((marker,index)=>{
-                    return(
-                      <Marker key={index} title={marker.Village} position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} />
-                    )
-                  })
-                }
-               </Map>
-             </APIProvider>
-           </div>
+          <div className="row">
+            <div className="col-6">
+              <div className="card" style={{height:500}}>
+                <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
+                  <Map
+                  style={{ borderRadius: "20px",height:500 }}
+                  defaultZoom={7}
+                  defaultCenter={{
+                    lat: 22.6708,
+                    lng: 71.5724,
+                  }}
+                  gestureHandling={"greedy"}
+                  disableDefaultUI
+                  renderingType="RASTER"
+                  >
+                    {
+                      mapMarkerList.map((marker,index)=>{
+                        return(
+                          <Marker key={index} title={marker.Village} position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} />
+                        )
+                      })
+                    }
+                  </Map>
+                </APIProvider>
+              </div>
+            </div>
+            <div className="col-6">
+            <Carousel>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./1.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="First slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./2.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Second slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./3.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./4.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./5.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./6.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./7.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./8.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+              <Carousel.Item>
+                <img
+                  className="d-block w-100"
+                  src="./10.jpg"
+                  style={{height:500,width:'100%'}}
+                  alt="Third slide"
+                />
+              </Carousel.Item>
+            </Carousel>
+            </div>
+          </div>
+          
          </div>
        </div>
        <div className="row">

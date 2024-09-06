@@ -1,78 +1,59 @@
-import React, { useState, useMemo } from 'react'
-import './Table.css'
+import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import "./Table.css";
 
-// Sample data (replace with your actual data)
-const initialData = [
-  { district: "District A", taluka: "Taluka 1", village: "Village X", location: "Location 1", inauguration_date: "2023-01-15" },
-  { district: "District A", taluka: "Taluka 2", village: "Village Y", location: "Location 2", inauguration_date: "2023-02-20" },
-  { district: "District B", taluka: "Taluka 3", village: "Village Z", location: "Location 3", inauguration_date: "2023-03-25" },
-  // Add more data as needed
-]
-
-export default function Records() {
-  const [data] = useState(initialData)
+export default function FilteredTable() {
+  const [data, setData] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    district: '',
-    taluka: '',
-    village: ''
-  })
+    Taluka: "Mauva",
+  });
+  const itemsPerPage = 10;
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      return (
-        (filters.district === '' || item.district === filters.district) &&
-        (filters.taluka === '' || item.taluka === filters.taluka) &&
-        (filters.village === '' || item.village === filters.village)
-      )
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const taluka = searchParams.get("Taluka") || "Mauva";
+    const offset = parseInt(searchParams.get("offset")) || 10;
+    setFilters({ Taluka: taluka });
+    setCurrentPage(Math.floor(offset / itemsPerPage) + 1);
+  }, [location]);
+
+  useEffect(() => {
+    fetchData();
+  }, [filters, currentPage]);
+
+  const fetchData = async () => {
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/fetchRecords?Taluka=${filters.Taluka}&offset=${offset}`,{
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+      },
     })
-  }, [data, filters])
 
-  const uniqueValues = useMemo(() => {
-    return {
-      districts: [...new Set(data.map(item => item.district))],
-      talukas: [...new Set(data.map(item => item.taluka))],
-      villages: [...new Set(data.map(item => item.village))]
-    }
-  }, [data])
+    const jsonResponse = await response.json();
+    console.log(40,jsonResponse);
+  };
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({ ...prev, [filterType]: value }))
-  }
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    updateURL(newPage);
+  };
+
+  const updateURL = (page) => {
+    const offset = (page - 1) * itemsPerPage;
+    navigate(`/table?Taluka=${filters.Taluka}&offset=${offset}`);
+  };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="filtered-table">
-      <div className="filters">
-        <select 
-          onChange={(e) => handleFilterChange('district', e.target.value)}
-          className="filter-select"
-        >
-          <option value="">All Districts</option>
-          {uniqueValues.districts.map(district => (
-            <option key={district} value={district}>{district}</option>
-          ))}
-        </select>
-
-        <select 
-          onChange={(e) => handleFilterChange('taluka', e.target.value)}
-          className="filter-select"
-        >
-          <option value="">All Talukas</option>
-          {uniqueValues.talukas.map(taluka => (
-            <option key={taluka} value={taluka}>{taluka}</option>
-          ))}
-        </select>
-
-        <select 
-          onChange={(e) => handleFilterChange('village', e.target.value)}
-          className="filter-select"
-        >
-          <option value="">All Villages</option>
-          {uniqueValues.villages.map(village => (
-            <option key={village} value={village}>{village}</option>
-          ))}
-        </select>
-      </div>
-
       <table className="data-table">
         <thead>
           <tr>
@@ -84,17 +65,34 @@ export default function Records() {
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((item, index) => (
+          {data.map((item, index) => (
             <tr key={index}>
-              <td>{item.district}</td>
-              <td>{item.taluka}</td>
-              <td>{item.village}</td>
-              <td>{item.location}</td>
-              <td>{item.inauguration_date}</td>
+              <td>{item.DISTRICT}</td>
+              <td>{item.TALUKA}</td>
+              <td>{item.VILLAGE}</td>
+              <td>{item.ENG_LOCATION}</td>
+              <td>{item.Inauguration_DATE}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      {/* <div className="pagination">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div> */}
     </div>
-  )
+  );
 }
