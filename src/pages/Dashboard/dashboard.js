@@ -178,8 +178,8 @@ export default function Dashboard() {
        </div>
        
        <div className="row" style={{marginTop:10}}>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -193,8 +193,8 @@ export default function Dashboard() {
              </div>
              </div>
          </div>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -208,8 +208,8 @@ export default function Dashboard() {
              </div>
              </div>
          </div>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -223,8 +223,8 @@ export default function Dashboard() {
              </div>
              </div>
          </div>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -238,8 +238,8 @@ export default function Dashboard() {
              </div>
              </div>
          </div>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -253,8 +253,8 @@ export default function Dashboard() {
              </div>
              </div>
          </div>
-         <div className="col-2">
-           <div class="card" style={{width: '100%',height:100}}>
+         <div className="col-xl-2 col-l-2 col-m-6 col-xs-12">
+           <div class="card mb-2" style={{width: '100%',height:100}}>
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
@@ -271,8 +271,8 @@ export default function Dashboard() {
 
          <div className="col-12" style={{marginTop:10}}>
           <div className="row">
-            <div className="col-6">
-              <div className="card" style={{height:500}}>
+            <div className="col-xl-6 col-l-6 col-m-6 col-xs-12">
+              <div className="card mb-2" style={{height:500}}>
                 <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
                   <Map
                   style={{ borderRadius: "20px",height:500 }}
@@ -296,7 +296,7 @@ export default function Dashboard() {
                 </APIProvider>
               </div>
             </div>
-            <div className="col-6">
+            <div className="col-xl-6 col-l-6 col-m-6 col-xs-12">
             <Carousel>
               <Carousel.Item>
                 <img
@@ -377,7 +377,7 @@ export default function Dashboard() {
          </div>
        </div>
        <div className="row">
-         <div className="col-8">
+         <div className="col-xl-8 col-l-8 col-m-8 col-xs-12">
            <div class="card" style={{marginTop:10,height:250}}>
            <h5 class="card-title">Pie Chart for all Talukas</h5>
              <Chart
@@ -389,7 +389,7 @@ export default function Dashboard() {
              />
            </div>
          </div>
-         <div className="col-4">
+         <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
            <div class="card" style={{marginTop:10,height:250}}>
              <h5 class="card-title">Inaugrations & Completion Status (in %)</h5>
              <div style={{display:'flex',width:'100%',alignContent:'center',justifyContent:'center'}}>
