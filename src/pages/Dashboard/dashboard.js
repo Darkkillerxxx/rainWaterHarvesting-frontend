@@ -8,7 +8,9 @@ import { RiRoadMapFill } from "react-icons/ri";
 import { TbTargetArrow } from "react-icons/tb";
 import { GiInauguration } from "react-icons/gi";
 import { FaRegThumbsUp } from "react-icons/fa";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
+import { Carousel } from 'react-bootstrap';
 
 
 export default function Dashboard() {
@@ -21,6 +23,8 @@ export default function Dashboard() {
   const [pieValue,setPieValue] = useState([])
   const [stackedBarChart,setStackedBarChart] = useState([]);
   const [mapMarkerList,setmapMarkerList] = useState([]);
+  const [selectedValue, setSelectedValue] = useState(null);
+
 
   const fetchDashboardvalues = async() =>{
     try{
@@ -110,6 +114,22 @@ export default function Dashboard() {
     }
   }
 
+  const chartEvents = [
+    {
+      eventName: "select",
+      callback: ({ chartWrapper }) => {
+        const chart = chartWrapper.getChart();
+        const selection = chart.getSelection();
+        if (selection.length > 0) {
+          const selectedItem = selection[0];
+          const selectedRow = selectedItem.row;
+          setSelectedValue(pieValue[selectedRow + 1][0]);
+          alert(`You clicked on ${pieValue[selectedRow + 1][0]}`);
+        }
+      },
+    },
+  ];
+
 
   useEffect(()=>{
     console.log(103);
@@ -117,6 +137,12 @@ export default function Dashboard() {
     fetchMapMarkerLocations();
     fetchPicklistValues();
   },[selectedCity])
+
+  // useEffect(() => {
+  //   const carousel = document.getElementById('carouselExampleIndicators');
+  //   const carouselInstance = new bootstrap.Carousel(carousel);
+  //   carouselInstance.cycle();
+  // }, []);
   
   return (
     <>
@@ -149,10 +175,85 @@ export default function Dashboard() {
             </select>
           </div>
         </div>
-       
        </div>
+
+       <Carousel>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./1.jpg"
+              style={{height:500,width:'100%'}}
+              alt="First slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./2.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Second slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./3.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./4.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./5.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./6.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./7.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./8.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className="d-block w-100"
+              src="./10.jpg"
+              style={{height:500,width:'100%'}}
+              alt="Third slide"
+            />
+          </Carousel.Item>
+        </Carousel>
+
        
-       <div className="row">
+       <div className="row" style={{marginTop:10}}>
          <div className="col-2">
            <div class="card" style={{width: '100%',height:100}}>
              <div className="row">
@@ -204,7 +305,7 @@ export default function Dashboard() {
                <div className="col-8">
                  <div class="card-body">
                    <div style={{fontSize:10}} class="card-text">Target</div>
-                   <h4 class="card-title">88</h4>
+                   <h4 class="card-title">{dashboardData.totalTargetCount}</h4>
                  </div>
                </div>
                <div className="col-4" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
@@ -279,6 +380,7 @@ export default function Dashboard() {
                data={pieValue}
                width={"100%"}
                height={"200px"}
+               chartEvents={chartEvents}
              />
            </div>
          </div>
