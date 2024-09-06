@@ -276,10 +276,10 @@ export default function Dashboard() {
                 <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
                   <Map
                   style={{ borderRadius: "20px",height:500 }}
-                  defaultZoom={7}
+                  defaultZoom={10}
                   defaultCenter={{
-                    lat: 22.6708,
-                    lng: 71.5724,
+                    lat: 21.1702,
+                    lng: 72.8311,
                   }}
                   gestureHandling={"greedy"}
                   disableDefaultUI
