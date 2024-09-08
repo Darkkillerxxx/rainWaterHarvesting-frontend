@@ -28,15 +28,24 @@ export default function FilteredTable() {
 
   useEffect(() => {
     fetchData();
-    setDependentFilters();  // Ensure this runs after filters are set
+   // setDependentFilters();  // Ensure this runs after filters are set
   }, [filters, currentPage]);
 
   const fetchPicklistValues = async () => {
     try {
       const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
       const data = await response.json();
-      setPicklistData(data.data);  // Store the data in state
-      setDependentFilters();  // Call to set the picklist values initially
+      const picklistData = data.data;
+  
+      const districtValues = [...new Set(picklistData.map(item => item.DISTRICT))];
+      const talukaValues = [...new Set(picklistData.map(item => item.TALUKA))];
+      const villageValues = [...new Set(picklistData.map(item => item.VILLAGE))];
+  
+      setPicklistValues({
+        district: districtValues,
+        taluka: talukaValues,
+        village: villageValues,
+      });
     } catch (error) {
       console.error('Error fetching picklist values:', error);
     }
@@ -60,8 +69,9 @@ export default function FilteredTable() {
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
+  
     const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT || ''}&Taluka=${filters.TALUKA || ''}&Village=${filters.VILLAGE || ''}&offSet=${offset}`,
+      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
       {
         method: "GET",
         headers: {
@@ -69,6 +79,7 @@ export default function FilteredTable() {
         },
       },
     );
+  
     const jsonResponse = await response.json();
     setData(jsonResponse.data.data);
     setTotalCount(jsonResponse.data.totalCount);
@@ -78,7 +89,12 @@ export default function FilteredTable() {
     setCurrentPage(newPage);
   };
 
-  const updateRecordInTable = (item) => {
+  const updateRecordInTable = async(item) => {
+    const isAuth = await localStorage.getItem('token');
+    if(!isAuth){
+      navigate("/login");
+      return;
+    }
     navigate("/create", { state: { item } });
   };
 
@@ -108,14 +124,26 @@ export default function FilteredTable() {
     }));
   };
 
+  
+
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="filtered-table">
       <div className="filters">
         <select
-          value={filters.DISTRICT || 'null'}
-          onChange={handleDistrictChange}
+          value={filters.DISTRICT}
+          onChange={(e) => {
+            setFilters({ ...filters, DISTRICT: e.target.value });
+            if (e.target.value !== 'null') {
+              const filteredTaluka = picklistValues.taluka.filter(taluka => {
+                return picklistData.find(item => item.DISTRICT === e.target.value && item.TALUKA === taluka);
+              });
+              setPicklistValues({ ...picklistValues, taluka: filteredTaluka });
+            } else {
+              fetchPicklistValues();
+            }
+          }}
         >
           <option value="null">Select District</option>
           {picklistValues.district.map((district, index) => (
@@ -124,8 +152,17 @@ export default function FilteredTable() {
         </select>
 
         <select
-          value={filters.TALUKA || 'null'}
-          onChange={handleTalukaChange}
+          value={filters.TALUKA}
+          onChange={(e) => {
+            setFilters({ ...filters, TALUKA: e.target.value });
+            if (e.target.value !== 'null') {
+              const filteredVillage = picklistData.filter(item => item.TALUKA === e.target.value);
+              const villageValues = [...new Set(filteredVillage.map(item => item.VILLAGE))];
+              setPicklistValues({ ...picklistValues, village: villageValues });
+            } else {
+              fetchPicklistValues();
+            }
+          }}
         >
           <option value="null">Select Taluka</option>
           {picklistValues.taluka.map((taluka, index) => (
@@ -134,8 +171,11 @@ export default function FilteredTable() {
         </select>
 
         <select
-          value={filters.VILLAGE || 'null'}
-          onChange={handleVillageChange}
+          value={filters.VILLAGE}
+          onChange={(e) => {
+            setFilters({ ...filters, VILLAGE: e.target.value });
+            fetchData();
+          }}
         >
           <option value="null">Select Village</option>
           {picklistValues.village.map((village, index) => (
