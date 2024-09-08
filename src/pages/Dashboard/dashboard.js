@@ -117,7 +117,7 @@ export default function Dashboard() {
   const chartEvents = [
     {
       eventName: "select",
-      callback: ({ chartWrapper }) => {
+      callback: async({ chartWrapper }) => {
         const chart = chartWrapper.getChart();
         const selection = chart.getSelection();
         if (selection.length > 0) {
@@ -125,10 +125,21 @@ export default function Dashboard() {
           const selectedRow = selectedItem.row;
           setSelectedValue(pieValue[selectedRow + 1][0]);
           alert(`You clicked on ${pieValue[selectedRow + 1][0]}`);
+          await localStorage.setItem('selectedTaluka',pieValue[selectedRow + 1][0]);
+          navigate('/records');
         }
       },
     },
   ];
+
+  const navigateToRecordCreation = async() =>{
+    const user = await localStorage.getItem('token');
+    if(user){
+      navigate('/create');
+      return
+    }
+    navigate('/login');
+  }
 
 
   useEffect(()=>{
@@ -434,7 +445,7 @@ export default function Dashboard() {
            </div>
          </div>
          <div className="col-12" style={{marginTop:10}}>
-          <button type="button" onClick={()=>navigate('/create')} class="btn btn-primary w-100">Create New Entry</button>
+          <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Entry</button>
          </div>
        </div>
      </div>

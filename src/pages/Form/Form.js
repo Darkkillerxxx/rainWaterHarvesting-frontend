@@ -1,67 +1,23 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import ClipLoader from "react-spinners/ClipLoader";
+import { useLocation } from "react-router-dom";
 import "./Form.css";
-import { DotLoader } from "react-spinners";
 
 const Form = () => {
-  const [DISTRICT, setDistrict] = useState(null);
-  const [picklistValues,setPicklistvalues] = useState(null);
-  const [districtValues,setDistrictValues] = useState([]);
-  const [talukaValues,setTalukaValues] = useState([]);
-  const [TALUKA, setTaluka] = useState("BARDOLI");
-  const [VILLAGE, setVillage] = useState("");
+  const location = useLocation();
+  const item = location.state?.item;
+
+  const [talukaOptions, setTalukaOptions] = useState([]);
+
+  const [DISTRICT, setDistrict] = useState(item?.DISTRICT || "Surat");
+  const [TALUKA, setTaluka] = useState(item?.TALUKA || "BARDOLI");
+  const [VILLAGE, setVillage] = useState(item?.VILLAGE || "");
   const [mobile, setMobile] = useState("");
-  const [LOCATION, setAddress] = useState("");
+  const [LOCATION, setAddress] = useState(item?.ENG_LOCATION || "");
   const [Inauguration_DATE, setDate] = useState("");
   const [Latitude, setLatitude] = useState(23.0225);
   const [Longitude, setLongitude] = useState(72.5714);
   const [photo, setPhoto] = useState(null);
-  const [isLoading,setIsLoading] = useState(false);
-
-  const override = {
-    display: "block",
-    margin: "0 auto",
-    borderColor: "red",
-  };
-
-  const fetchPicklistValues = () => {
-    try{
-      axios
-      .get(
-        "https://rainwaterharvesting-backend.onrender.com/getPicklistValues"
-      )
-      .then((res) => {
-        console.log(res);
-        if(res.data.code === 200){
-          const districtValues = [];
-          setPicklistvalues(res.data.data);
-
-          res.data.data.map((data)=>{
-            if(!districtValues.includes(data.DISTRICT)){
-              districtValues.push(data.DISTRICT)
-            }
-          })
-          console.log(districtValues);
-          setDistrictValues([...districtValues])
-        }
-      })
-      .catch((e) => {
-        console.log("Error:", e);
-      });
-    }
-    catch(error){
-      throw error;
-    }
-  }
-
-  useEffect(()=>{
-    if(DISTRICT){
-      console.log(51,picklistValues,DISTRICT);
-      const talukaValues = picklistValues.filter((picklistValue)=> picklistValue.DISTRICT === DISTRICT);
-      setTalukaValues([...talukaValues]);
-    }
-  },[DISTRICT])
 
   useEffect(() => {
     if (navigator.geolocation !== null) {
@@ -69,12 +25,26 @@ const Form = () => {
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
       });
+      fetchTalukaOptions();
     } else {
       console.log("Browser does not support geolocation");
     }
-
-    fetchPicklistValues();
   }, []);
+
+  const fetchTalukaOptions = async () => {
+    try {
+      const response = await fetch(
+        "https://rainwaterharvesting-backend.onrender.com/getPicklistValues",
+      );
+      const jsonResponse = await response.json();
+      const uniqueTalukas = [
+        ...new Set(jsonResponse.data.map((item) => item.TALUKA)),
+      ];
+      setTalukaOptions(uniqueTalukas);
+    } catch (error) {
+      console.error("Error fetching Taluka options:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,11 +77,9 @@ const Form = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result.split(',')[1]; // Get the base64 string
-        console.log(base64String); // Do something with the base64 string, e.g., save it to state
-        setPhoto(base64String); // Assuming setPhoto is used to store the base64 string
+        setPhoto(reader.result); // Set the image URL for preview
       };
-      reader.readAsDataURL(file); // Convert the file to base64
+      reader.readAsDataURL(file);
     }
   };
 
@@ -131,8 +99,6 @@ const Form = () => {
     // // for (let [key, value] of formData.entries()) {
     // //   console.log(`${key}: ${value}`);
     // // }
-    setIsLoading(true);
-    setTimeout(()=>{},3000)
 
     const data = {
       DISTRICT,
@@ -143,7 +109,7 @@ const Form = () => {
       Inauguration_DATE,
       Latitude,
       Longitude,
-      Inauguration_PHOTO1: photo, // Note: You can't send files directly in JSON
+      // photo: photo, // Note: You can't send files directly in JSON
     };
 
     console.log(data);
@@ -156,11 +122,9 @@ const Form = () => {
       .then((res) => {
         alert("Successfully added to the table");
         console.log("Successfully added to the table\nRes:", res);
-        setIsLoading(false);
       })
       .catch((e) => {
         console.log("Error:", e);
-        setIsLoading(false);
       });
   };
 
@@ -182,14 +146,8 @@ const Form = () => {
                 value={DISTRICT}
                 onChange={handleChange}
               >
-                <option value={null}>Please Select District</option>
-                {
-                  districtValues.map((district,index)=>{
-                    return (
-                      <option key={index} value={district}>{district}</option>
-                    )
-                  })
-                }
+                <option value="Surat">Surat</option>
+                <option value="Navsari">Navsari</option>
               </select>
             </div>
             <div className="grid-item">
@@ -200,14 +158,11 @@ const Form = () => {
                 value={TALUKA}
                 onChange={handleChange}
               >
-                <option value={null}>Select Taluka</option>
-                {
-                  talukaValues.map((taluka,index)=>{
-                    return(
-                      <option key={index} value={taluka.TALUKA}>{taluka.TALUKA}</option>
-                    )
-                  })
-                }
+                {talukaOptions.map((taluka, index) => (
+                  <option key={index} value={taluka}>
+                    {taluka}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -235,7 +190,7 @@ const Form = () => {
             </div>
           </div>
           <div className="form-group">
-            <label htmlFor="LOCATION">Rain Water Harvesting Place *</label>
+            <label htmlFor="LOCATION">Address *</label>
             <input
               id="LOCATION"
               name="LOCATION"
@@ -265,19 +220,16 @@ const Form = () => {
               onChange={handleFileChange}
             />
           </div>
-          {
-          isLoading ? 
-          <DotLoader
-              color="#16d39a"
-              loading={isLoading}
-              cssOverride={override}
-              size={30}
-              aria-label="Loading Spinner"
-              data-testid="loader"
-            />
-            :
-            <button type="submit">Submit</button>
-          }
+          <div className="form-group">
+            {photo && (
+              <img
+                className="uploadedImage"
+                src={photo}
+                alt="Uploaded Preview"
+              />
+            )}
+          </div>
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>

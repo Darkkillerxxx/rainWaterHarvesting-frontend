@@ -1,6 +1,5 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Table.css";
 
 export default function FilteredTable() {
@@ -8,82 +7,182 @@ export default function FilteredTable() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    Taluka: "Mauva",
+    DISTRICT: null,
+    TALUKA: null,
+    VILLAGE: null,
   });
+  const [picklistValues, setPicklistValues] = useState({
+    district: [],
+    taluka: [],
+    village: [],
+  });
+  const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
+
   const itemsPerPage = 10;
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const taluka = searchParams.get("Taluka") || "Mauva";
-    const offset = parseInt(searchParams.get("offset")) || 10;
-    setFilters({ Taluka: taluka });
-    setCurrentPage(Math.floor(offset / itemsPerPage) + 1);
-  }, [location]);
+    fetchPicklistValues();
+  }, []);
 
   useEffect(() => {
     fetchData();
+    setDependentFilters();  // Ensure this runs after filters are set
   }, [filters, currentPage]);
+
+  const fetchPicklistValues = async () => {
+    try {
+      const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
+      const data = await response.json();
+      setPicklistData(data.data);  // Store the data in state
+      setDependentFilters();  // Call to set the picklist values initially
+    } catch (error) {
+      console.error('Error fetching picklist values:', error);
+    }
+  };
+
+  const setDependentFilters = () => {
+    const districts = [...new Set(picklistData?.map(item => item.DISTRICT).filter(Boolean))];
+    const talukas = [...new Set(picklistData?.map(item => item.TALUKA).filter(Boolean))];
+    const villages = [...new Set(picklistData?.map(item => item.VILLAGE).filter(Boolean))];
+
+    setPicklistValues({
+      district: districts,
+      taluka: filters.DISTRICT
+        ? [...new Set(picklistData?.filter(item => item.DISTRICT === filters.DISTRICT).map(item => item.TALUKA))]
+        : talukas,
+      village: filters.TALUKA
+        ? [...new Set(picklistData?.filter(item => item.TALUKA === filters.TALUKA).map(item => item.VILLAGE))]
+        : villages,
+    });
+  };
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
-
-    const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/fetchRecords?Taluka=${filters.Taluka}&offset=${offset}`,{
-      method: "GET",
-      headers: {
-        "Cache-Control": "no-cache",
+    const response = await fetch(
+      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT || ''}&Taluka=${filters.TALUKA || ''}&Village=${filters.VILLAGE || ''}&offSet=${offset}`,
+      {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
       },
-    })
-
+    );
     const jsonResponse = await response.json();
-    console.log(40,jsonResponse);
+    setData(jsonResponse.data.data);
+    setTotalCount(jsonResponse.data.totalCount);
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    updateURL(newPage);
   };
 
-  const updateURL = (page) => {
-    const offset = (page - 1) * itemsPerPage;
-    navigate(`/table?Taluka=${filters.Taluka}&offset=${offset}`);
+  const updateRecordInTable = (item) => {
+    navigate("/create", { state: { item } });
+  };
+
+  const handleDistrictChange = (e) => {
+    const selectedDistrict = e.target.value;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      DISTRICT: selectedDistrict,
+      TALUKA: null,
+      VILLAGE: null,
+    }));
+  };
+
+  const handleTalukaChange = (e) => {
+    const selectedTaluka = e.target.value;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      TALUKA: selectedTaluka,
+      VILLAGE: null,
+    }));
+  };
+
+  const handleVillageChange = (e) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      VILLAGE: e.target.value,
+    }));
   };
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="filtered-table">
+      <div className="filters">
+        <select
+          value={filters.DISTRICT || 'null'}
+          onChange={handleDistrictChange}
+        >
+          <option value="null">Select District</option>
+          {picklistValues.district.map((district, index) => (
+            <option key={index} value={district}>{district}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.TALUKA || 'null'}
+          onChange={handleTalukaChange}
+        >
+          <option value="null">Select Taluka</option>
+          {picklistValues.taluka.map((taluka, index) => (
+            <option key={index} value={taluka}>{taluka}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.VILLAGE || 'null'}
+          onChange={handleVillageChange}
+        >
+          <option value="null">Select Village</option>
+          {picklistValues.village.map((village, index) => (
+            <option key={index} value={village}>{village}</option>
+          ))}
+        </select>
+      </div>
       <table className="data-table">
         <thead>
           <tr>
+            <th>ID</th>
             <th>DISTRICT</th>
             <th>TALUKA</th>
             <th>VILLAGE</th>
             <th>LOCATION</th>
             <th>INAUGURATION DATE</th>
+            <th>ENG_GRANT</th>
+            <th>Labour</th>
+            <th>IMPLIMANTATION_AUTHORITY</th>
+            <th>LOCATION_G</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr key={index}>
+            <tr key={index} onClick={() => updateRecordInTable(item)}>
+              <td>{item.ID}</td>
               <td>{item.DISTRICT}</td>
               <td>{item.TALUKA}</td>
               <td>{item.VILLAGE}</td>
               <td>{item.ENG_LOCATION}</td>
               <td>{item.Inauguration_DATE}</td>
+              <td>{item.ENG_GRANT}</td>
+              <td>{item.Labour}</td>
+              <td>{item.IMPLIMANTATION_AUTHORITY}</td>
+              <td>{item.LOCATION}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/* <div className="pagination">
+      <div className="pagination">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
           Previous
         </button>
-        <span>
+        <span style={{ width: '300px' }}>
           Page {currentPage} of {totalPages}
         </span>
         <button
@@ -92,7 +191,7 @@ export default function FilteredTable() {
         >
           Next
         </button>
-      </div> */}
+      </div>
     </div>
   );
 }
