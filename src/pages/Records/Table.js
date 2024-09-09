@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./Table.css";
 
+
 export default function FilteredTable() {
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,36 +36,21 @@ export default function FilteredTable() {
     try {
       const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
       const data = await response.json();
-      const picklistData = data.data;
-  
-      const districtValues = [...new Set(picklistData.map(item => item.DISTRICT))];
-      const talukaValues = [...new Set(picklistData.map(item => item.TALUKA))];
-      const villageValues = [...new Set(picklistData.map(item => item.VILLAGE))];
+      setPicklistData(data.data);
+
+      const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
+      const talukaValues = [...new Set(data.data.map(item => item.TALUKA))];
+      const villageValues = [...new Set(data.data.map(item => item.VILLAGE))];
   
       setPicklistValues({
         district: districtValues,
         taluka: talukaValues,
         village: villageValues,
       });
+
     } catch (error) {
       console.error('Error fetching picklist values:', error);
     }
-  };
-
-  const setDependentFilters = () => {
-    const districts = [...new Set(picklistData?.map(item => item.DISTRICT).filter(Boolean))];
-    const talukas = [...new Set(picklistData?.map(item => item.TALUKA).filter(Boolean))];
-    const villages = [...new Set(picklistData?.map(item => item.VILLAGE).filter(Boolean))];
-
-    setPicklistValues({
-      district: districts,
-      taluka: filters.DISTRICT
-        ? [...new Set(picklistData?.filter(item => item.DISTRICT === filters.DISTRICT).map(item => item.TALUKA))]
-        : talukas,
-      village: filters.TALUKA
-        ? [...new Set(picklistData?.filter(item => item.TALUKA === filters.TALUKA).map(item => item.VILLAGE))]
-        : villages,
-    });
   };
 
   const fetchData = async () => {
@@ -79,6 +65,8 @@ export default function FilteredTable() {
         },
       },
     );
+
+
   
     const jsonResponse = await response.json();
     setData(jsonResponse.data.data);
@@ -110,11 +98,19 @@ export default function FilteredTable() {
 
   const handleTalukaChange = (e) => {
     const selectedTaluka = e.target.value;
+    // console.log(118,picklistData);
     setFilters(prevFilters => ({
       ...prevFilters,
       TALUKA: selectedTaluka,
       VILLAGE: null,
     }));
+  
+    const filteredVillages = picklistData.filter((data) => {
+      return data.TALUKA === selectedTaluka;
+    });
+    
+    const villageValues = filteredVillages.map(item => item.VILLAGE);
+    setPicklistValues({ ...picklistValues, village: villageValues });
   };
 
   const handleVillageChange = (e) => {
@@ -140,6 +136,7 @@ export default function FilteredTable() {
                 return picklistData.find(item => item.DISTRICT === e.target.value && item.TALUKA === taluka);
               });
               setPicklistValues({ ...picklistValues, taluka: filteredTaluka });
+              
             } else {
               fetchPicklistValues();
             }
@@ -154,14 +151,7 @@ export default function FilteredTable() {
         <select
           value={filters.TALUKA}
           onChange={(e) => {
-            setFilters({ ...filters, TALUKA: e.target.value });
-            if (e.target.value !== 'null') {
-              const filteredVillage = picklistData.filter(item => item.TALUKA === e.target.value);
-              const villageValues = [...new Set(filteredVillage.map(item => item.VILLAGE))];
-              setPicklistValues({ ...picklistValues, village: villageValues });
-            } else {
-              fetchPicklistValues();
-            }
+            handleTalukaChange(e);
           }}
         >
           <option value="null">Select Taluka</option>
