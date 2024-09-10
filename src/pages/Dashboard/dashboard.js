@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./dashboard.css";
 import { Chart } from "react-google-charts";
-import { Map, Marker, APIProvider } from "@vis.gl/react-google-maps";
+import { Map, Marker, APIProvider,InfoWindow } from "@vis.gl/react-google-maps";
 import { GoNumber } from "react-icons/go";
 import { FaRoad } from "react-icons/fa6";
 import { RiRoadMapFill } from "react-icons/ri";
@@ -11,6 +11,10 @@ import { FaRegThumbsUp } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
 import { Carousel } from 'react-bootstrap';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import Paper from '@mui/material/Paper';
+import { isEditable } from "@testing-library/user-event/dist/utils";
+
 
 
 export default function Dashboard() {
@@ -24,7 +28,92 @@ export default function Dashboard() {
   const [stackedBarChart,setStackedBarChart] = useState([]);
   const [mapMarkerList,setmapMarkerList] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
+  const [tableData,setTableData] = useState([]);
+  const [tableCount,setTableCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    DISTRICT: 'Surat',
+    TALUKA: null,
+    VILLAGE: null,
+  });
+  const [picklistValues, setPicklistValues] = useState({
+    district: [],
+    taluka: [],
+    village: [],
+  });
+  const [showTable,setShowTable] = useState(true)
+  const [activeMarker, setActiveMarker] = useState(null);
+  const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
 
+  const itemsPerPage = 10;
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 70, editable: true },
+    { field: 'district', headerName: 'District', width: 130, editable: true },
+    { field: 'taluka', headerName: 'Taluka', width: 130, editable: true },
+    { field: 'village', headerName: 'Village', width: 130, editable: true },
+    { field: 'location', headerName: 'Location', width: 130, editable: true },
+    { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: true },
+    { field: 'engGrant', headerName: 'English Grant', width: 150, editable: true },
+    { field: 'labour', headerName: 'Labour', width: 90, editable: true },
+    { field: 'implementationAuthority', headerName: 'Implementation Authority', width: 200, editable: true },
+  ];
+  
+
+  const paginationModel = { page: 0, pageSize: 5 };
+
+
+
+  const fetchData = async () => {
+    const offset = (currentPage - 1) * itemsPerPage;
+    console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    const response = await fetch(
+      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
+      {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      },
+    );
+
+    const jsonResponse = await response.json();
+    const rows = jsonResponse.data.data.map((data, index) => ({
+      id: data.ID,  // Use the ID field
+      district: data.DISTRICT,
+      taluka: data.TALUKA,
+      village: data.VILLAGE,
+      location: data.ENG_LOCATION || data.LOCATION,  // Use either the English location or the location field
+      inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,  // Parse the date
+      engGrant: data.ENG_GRANT || data.GRANT,  // Use either the English grant or the grant field
+      labour: data.Labour || 'N/A',  // Default to 'N/A' if no labour field
+      implementationAuthority: data.IMPLIMANTATION_AUTHORITY || 'N/A',  // Default to 'N/A' if no implementation authority
+    }));
+    
+    setTableData(rows);
+    setTableCount(jsonResponse.data.totalCount);
+    triggerShowTable();
+  };
+
+  const triggerShowTable = async() =>{
+    const token = await localStorage.getItem('token');
+    if(token){
+      setShowTable(true)
+      return;
+    }
+    setShowTable(false)
+    
+  }
+
+  useEffect(()=>{
+    fetchData();
+  },[])
+
+  useEffect(() => {
+    if(filters.DISTRICT || filters.TALUKA || filters.VILLAGE){
+      fetchData();
+    }
+  }, [filters]);
 
   const fetchDashboardvalues = async() =>{
     try{
@@ -43,8 +132,6 @@ export default function Dashboard() {
       setGaugeValue([...gaugeInitialValue,inaugrationValue,completionValue])
       console.log(36,[...gaugeInitialValue,inaugrationValue,completionValue]);
 
-
-
       const initialPieValue = [["Task", "Hours per Day"]];
 
       json.pieChart.forEach(values=>{
@@ -53,11 +140,6 @@ export default function Dashboard() {
 
       console.log([...initialPieValue]);
       setPieValue([...initialPieValue]);
-
-
-
-
-
 
       const stackedBarChartValue = json.stackedBarChart;
 
@@ -86,6 +168,8 @@ export default function Dashboard() {
     }
   }
 
+
+
   const fetchMapMarkerLocations = async() =>{
     try{
       const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${selectedCity}`);
@@ -102,13 +186,19 @@ export default function Dashboard() {
 
   const fetchPicklistValues = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllDistrics`);
-      const json = await response.json();
-      //console.log(json);
-      
-      if(json.code === 200){
-        setDistricts([...json.data])
-      }
+      const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
+      const data = await response.json();
+      setPicklistData(data.data);
+
+      const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
+      const talukaValues = [...new Set(data.data.map(item => item.TALUKA))];
+      const villageValues = [...new Set(data.data.map(item => item.VILLAGE))];
+  
+      setPicklistValues({
+        district: districtValues,
+        taluka: talukaValues,
+        village: villageValues,
+      });
     }catch(error){
       throw error;
     }
@@ -126,7 +216,7 @@ export default function Dashboard() {
           setSelectedValue(pieValue[selectedRow + 1][0]);
           alert(`You clicked on ${pieValue[selectedRow + 1][0]}`);
           await localStorage.setItem('selectedTaluka',pieValue[selectedRow + 1][0]);
-          navigate('/records');
+          navigate('/records', { state: { selectedTaluka: pieValue[selectedRow + 1][0] } });
         }
       },
     },
@@ -149,11 +239,77 @@ export default function Dashboard() {
     fetchPicklistValues();
   },[selectedCity])
 
-  // useEffect(() => {
-  //   const carousel = document.getElementById('carouselExampleIndicators');
-  //   const carouselInstance = new bootstrap.Carousel(carousel);
-  //   carouselInstance.cycle();
-  // }, []);
+  const updateRecords = async (updatedRecord) => {
+    try {
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/updateRecords`, {
+        method: 'POST', // or 'PUT' if you're updating existing records
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedRecord), // Convert the updatedRecord object to JSON
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update records');
+      }
+  
+      alert('Tables Successfully Updated');
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  const handleTalukaChange = (e) => {
+    const selectedTaluka = e.target.value;
+    // console.log(118,picklistData);
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      TALUKA: selectedTaluka,
+      VILLAGE: null,
+    }));
+  
+    const filteredVillages = picklistData.filter((data) => {
+      return data.TALUKA === selectedTaluka;
+    });
+    
+    const villageValues = filteredVillages.map(item => item.VILLAGE);
+    setPicklistValues({ ...picklistValues, village: villageValues });
+  };
+  
+
+  const processRowUpdate = (newRow, oldRow) => {
+
+    console.log('Row updated:', newRow);
+
+    const updatedRows = newRow.map((data) => {
+      return {
+        ID: data.id,
+        DISTRICT: data.district,
+        TALUKA: data.taluka,
+        VILLAGE: data.village, // Assuming you want the English village name, or you can add gVILLAGE if necessary
+        ENG_LOCATION: data.location, // Maps to location
+        Inauguration_DATE: data.inaugurationDate, // Maps to the date field
+        ENG_GRANT: data.engGrant, // Maps to English Grant
+        Labour: data.labour || null, // If labour exists, otherwise null
+        IMPLIMANTATION_AUTHORITY: data.implementationAuthority || null, // If authority exists, otherwise null
+        // Add any other fields that might be needed from the original object
+      };
+    });
+
+    updateRecords(updatedRows[0]);
+    
+    return newRow;
+  };
+
+  const handleMarkerClick = (index) => {
+    console.log(276,index);
+    setActiveMarker(index);
+  };
+
+  const handleMouseOut = () => {
+    setActiveMarker(null);
+  };
+  
   
   return (
     <>
@@ -171,19 +327,6 @@ export default function Dashboard() {
           </div>
           <div className="col-10">
             <h1 style={{color:'#1ca1e4'}}>Rainwater Harvesting For State Of Gujarat</h1>
-            <select style={{width:250}} onChange={(e) => { 
-              console.log(e.target.value);
-              setSelectedCity(e.target.value)
-              }} class="form-select" aria-label="Default select example">
-              <option selected>Please Select District</option>
-              {
-                districts.map((district,index)=>{
-                  return (
-                    <option key={index} value={district.DISTRICT}>{district.DISTRICT}</option>
-                  )
-                })
-              }
-            </select>
           </div>
         </div>
        </div>
@@ -299,7 +442,26 @@ export default function Dashboard() {
                     {
                       mapMarkerList.map((marker,index)=>{
                         return(
-                          <Marker key={index} title={marker.Village} position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} />
+                          <Marker 
+                          key={index} 
+                          title={
+                            `Village:${marker.Village}, Location:${marker.Location} , Inauguration Date : ${marker.Inauguration_DATE ? marker.Inauguration_DATE : null}
+                            `
+                          } 
+                          position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} 
+                          onClick={()=>handleMarkerClick(index)}
+                          >
+                             {activeMarker === index ? 
+                                <InfoWindow 
+                                position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.Longitude) }}
+                                onCloseClick={handleMouseOut}>
+                                  <div>
+                                    <h4>{marker.Village}</h4>
+                                    <p>{marker.Location}</p>
+                                  </div>
+                                </InfoWindow>
+                              :null}
+                          </Marker>
                         )
                       })
                     }
@@ -421,6 +583,66 @@ export default function Dashboard() {
              </div>
            </div>
          </div>
+         
+         {/* Insert Table Here */}
+         <div className="col-12 mt-4 mb-2">
+            <div className="row">
+              <div className="col-6">
+                <div className="filters">
+                  <select
+                    value={filters.TALUKA}
+                    onChange={(e) => {
+                      handleTalukaChange(e);
+                    }}
+                  >
+                    <option value="null">Select Taluka</option>
+                    {picklistValues.taluka.map((taluka, index) => (
+                      <option key={index} value={taluka}>{taluka}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={filters.VILLAGE}
+                    onChange={(e) => {
+                      // setFilters({ ...filters, VILLAGE: e.target.value });
+                      // fetchData();
+                    }}
+                  >
+                    <option value="null">Select Village</option>
+                    {/* {picklistValues.village.map((village, index) => (
+                      <option key={index} value={village}>{village}</option>
+                    ))} */}
+                  </select>
+                </div>
+              </div>
+              <div className="col-4"/>
+              <div className="col-2">
+                <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Entry</button>
+              </div>
+            </div>
+         </div>
+         {
+         showTable ? 
+         
+         <Paper sx={{ height: 400, width: '100%' }}>
+            <DataGrid
+              rows={tableData}
+              columns={columns}
+              initialState={{ pagination: { paginationModel } }}
+              pageSizeOptions={[5, 10]}
+              checkboxSelection
+              sx={{ border: 0 }}
+              processRowUpdate={processRowUpdate}
+              experimentalFeatures={{ newEditingApi: true }}
+            />
+          </Paper>
+         : 
+         <div style={{width:'100%',textAlign:'center',marginTop:25,marginBottom:25}}>
+          <p>You Need to Login to view the Table.</p>
+          <button className="btn btn-primary" onClick={()=>navigate('/login')} style={{width:200,height:35}}>Click Here to Log In</button>
+         </div>
+         } 
+        
          <div className="col-12">
            <div class="card" style={{marginTop:10}}>
            <Chart
@@ -444,9 +666,9 @@ export default function Dashboard() {
              />
            </div>
          </div>
-         <div className="col-12" style={{marginTop:10}}>
+         {/* <div className="col-12" style={{marginTop:10}}>
           <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Entry</button>
-         </div>
+         </div> */}
        </div>
      </div>
     : 

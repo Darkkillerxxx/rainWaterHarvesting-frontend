@@ -30,7 +30,7 @@ export const Login = () => {
       if (data.code === 200) {
         localStorage.setItem("token", data.token);
         alert("Login successful!");
-        navigate('/create');
+        navigate('/');
         // Redirect user to another page or perform another action after login
       } else {
         setError("Login failed. Please check your credentials.");

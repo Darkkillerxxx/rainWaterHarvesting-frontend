@@ -22,14 +22,22 @@ export default function FilteredTable() {
   const itemsPerPage = 10;
   const navigate = useNavigate();
   const location = useLocation();
+  const selectedTaluka = location.state?.selectedTaluka; // Access the passed state
+  console.log(26,location)
 
   useEffect(() => {
     fetchPicklistValues();
+    setFilters({
+      ...filters,TALUKA:selectedTaluka
+    })
   }, []);
 
   useEffect(() => {
-    fetchData();
-   // setDependentFilters();  // Ensure this runs after filters are set
+    console.log(36)
+    if(filters.DISTRICT || filters.TALUKA || filters.VILLAGE){
+      console.log(38)
+      fetchData();
+    }
   }, [filters, currentPage]);
 
   const fetchPicklistValues = async () => {
@@ -55,7 +63,7 @@ export default function FilteredTable() {
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
-  
+    console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
     const response = await fetch(
       `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
       {
@@ -66,8 +74,6 @@ export default function FilteredTable() {
       },
     );
 
-
-  
     const jsonResponse = await response.json();
     setData(jsonResponse.data.data);
     setTotalCount(jsonResponse.data.totalCount);
@@ -119,8 +125,6 @@ export default function FilteredTable() {
       VILLAGE: e.target.value,
     }));
   };
-
-  
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
