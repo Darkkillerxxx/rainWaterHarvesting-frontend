@@ -54,21 +54,24 @@ export default function Dashboard() {
     { field: 'village', headerName: 'Village', width: 130, editable: true },
     { field: 'location', headerName: 'Location', width: 130, editable: true },
     { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: true },
-    { field: 'engGrant', headerName: 'English Grant', width: 150, editable: true },
-    { field: 'labour', headerName: 'Labour', width: 90, editable: true },
-    { field: 'implementationAuthority', headerName: 'Implementation Authority', width: 200, editable: true },
+    { field: 'inaugurationPhoto', headerName: 'Inauguration Photo', width: 150, editable: true },
+    { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: true },
+    { field: 'completionPhoto', headerName: 'Completion Photo', width: 150, editable: true },
   ];
   
 
   const paginationModel = { page: 0, pageSize: 5 };
 
+  useEffect(()=>{
+
+  },[])
 
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
-    console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    // console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
     const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
+      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
       {
         method: "GET",
         headers: {
@@ -84,10 +87,10 @@ export default function Dashboard() {
       taluka: data.TALUKA,
       village: data.VILLAGE,
       location: data.ENG_LOCATION || data.LOCATION,  // Use either the English location or the location field
-      inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,  // Parse the date
-      engGrant: data.ENG_GRANT || data.GRANT,  // Use either the English grant or the grant field
-      labour: data.Labour || 'N/A',  // Default to 'N/A' if no labour field
-      implementationAuthority: data.IMPLIMANTATION_AUTHORITY || 'N/A',  // Default to 'N/A' if no implementation authority
+      inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,
+      inaugurationPhoto: data.Inauguration_PHOTO1 ? new Date(data.Inauguration_PHOTO1) : null,
+      completionDate: data.COMPLETED_DATE ? new Date(data.COMPLETED_DATE) : null,
+      completionPhoto: data.COMPLETED_PHOTO1 ? new Date(data.COMPLETED_PHOTO1) : null,  // Parse the date
     }));
     
     setTableData(rows);
@@ -167,8 +170,6 @@ export default function Dashboard() {
       throw error;
     }
   }
-
-
 
   const fetchMapMarkerLocations = async() =>{
     try{
@@ -281,22 +282,20 @@ export default function Dashboard() {
 
     console.log('Row updated:', newRow);
 
-    const updatedRows = newRow.map((data) => {
-      return {
-        ID: data.id,
-        DISTRICT: data.district,
-        TALUKA: data.taluka,
-        VILLAGE: data.village, // Assuming you want the English village name, or you can add gVILLAGE if necessary
-        ENG_LOCATION: data.location, // Maps to location
-        Inauguration_DATE: data.inaugurationDate, // Maps to the date field
-        ENG_GRANT: data.engGrant, // Maps to English Grant
-        Labour: data.labour || null, // If labour exists, otherwise null
-        IMPLIMANTATION_AUTHORITY: data.implementationAuthority || null, // If authority exists, otherwise null
-        // Add any other fields that might be needed from the original object
-      };
-    });
-
-    updateRecords(updatedRows[0]);
+    const rowsToUpdate = {
+      ID: newRow.id,
+      DISTRICT: newRow.district,
+      TALUKA: newRow.taluka,
+      VILLAGE: newRow.village, // Assuming you want the English village name, or you can add gVILLAGE if necessary
+      ENG_LOCATION: newRow.location, // Maps to location
+      Inauguration_DATE: newRow.inaugurationDate, // Maps to the date field
+      ENG_GRANT: newRow.engGrant, // Maps to English Grant
+      Labour: newRow.labour || null, // If labour exists, otherwise null
+      IMPLIMANTATION_AUTHORITY: newRow.implementationAuthority || null, // If authority exists, otherwise null
+      // Add any other fields that might be needed from the original object
+    }
+    console.log(296,rowsToUpdate);
+    updateRecords(rowsToUpdate);
     
     return newRow;
   };
@@ -337,7 +336,7 @@ export default function Dashboard() {
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
-                   <div style={{fontSize:10}} class="card-text">Total</div>
+                   <div style={{fontSize:10}} class="card-text">State Target</div>
                    <h4 class="card-title">{dashboardData.totalRecordCount}</h4>
                  </div>
                </div>
@@ -604,14 +603,13 @@ export default function Dashboard() {
                   <select
                     value={filters.VILLAGE}
                     onChange={(e) => {
-                      // setFilters({ ...filters, VILLAGE: e.target.value });
-                      // fetchData();
+                      setFilters({ ...filters, VILLAGE: e.target.value });
                     }}
                   >
                     <option value="null">Select Village</option>
-                    {/* {picklistValues.village.map((village, index) => (
+                    {picklistValues.village.map((village, index) => (
                       <option key={index} value={village}>{village}</option>
-                    ))} */}
+                    ))}
                   </select>
                 </div>
               </div>

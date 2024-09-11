@@ -15,6 +15,7 @@ const Form = () => {
   const [mobile, setMobile] = useState("");
   const [LOCATION, setAddress] = useState(item?.ENG_LOCATION || "");
   const [Inauguration_DATE, setDate] = useState("");
+  const [InaugurationPhoto,setInaugurationPhoto] = useState("")
   const [Latitude, setLatitude] = useState(23.0225);
   const [Longitude, setLongitude] = useState(72.5714);
   const [photo, setPhoto] = useState(null);
@@ -109,7 +110,7 @@ const Form = () => {
       Inauguration_DATE,
       Latitude,
       Longitude,
-      // photo: photo, // Note: You can't send files directly in JSON
+      Inauguration_PHOTO1: photo, // Note: You can't send files directly in JSON
     };
 
     console.log(data);
@@ -220,7 +221,7 @@ const Form = () => {
               onChange={handleFileChange}
             />
           </div>
-          <div className="form-group">
+          {/* <div className="form-group">
             {photo && (
               <img
                 className="uploadedImage"
@@ -228,7 +229,7 @@ const Form = () => {
                 alt="Uploaded Preview"
               />
             )}
-          </div>
+          </div> */}
           <button type="submit">Submit</button>
         </form>
       </div>
