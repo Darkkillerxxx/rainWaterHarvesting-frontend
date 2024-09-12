@@ -354,9 +354,12 @@ export default function Dashboard() {
               style={{ height: "80px", width: "100%", objectFit: "contain",marginTop:10 }}
             />
           </div>
-          <div className="col-10">
+          <div className="col-8">
             <h2 style={{color:'#1ca1e4'}}>Rainwater Water Harvesting</h2>
             <h2 style={{color:'#1ca1e4'}}>(State Of Gujarat)</h2>
+          </div>
+          <div className="col-2">
+            <button className="btn btn-primary mt-3" onClick={()=>navigate('/login')}>Click Here to Login</button>
           </div>
         </div>
        </div>
