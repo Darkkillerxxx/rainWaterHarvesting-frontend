@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [selectedData,setSelectedData] = useState(null)
   const [showModal,setShowModal] = useState(false);
 
-  const [showTable,setShowTable] = useState(true)
+  const [isLoggedIn,setIsLoggedIn] = useState(true)
   const [activeMarker, setActiveMarker] = useState(null);
   const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
 
@@ -71,16 +71,16 @@ export default function Dashboard() {
         </Button>
       ),
     },
-    { field: 'id', headerName: 'ID', width: 70, editable: true },
-    { field: 'district', headerName: 'District', width: 130, editable: true },
-    { field: 'taluka', headerName: 'Taluka', width: 130, editable: true },
-    { field: 'village', headerName: 'Village', width: 130, editable: true },
-    { field: 'location', headerName: 'Location', width: 130, editable: true },
-    { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: true },
+    { field: 'id', headerName: 'ID', width: 70, editable: false },
+    { field: 'district', headerName: 'District', width: 130, editable: false },
+    { field: 'taluka', headerName: 'Taluka', width: 130, editable: false },
+    { field: 'village', headerName: 'Village', width: 130, editable: false },
+    { field: 'location', headerName: 'Location', width: 130, editable: false },
+    { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: false },
     { field: 'inaugurationPhoto', headerName: 'Inauguration Photo', width: 150},
-    { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: true },
+    { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: false },
     { field: 'completionPhoto', headerName: 'Completion Photo', width: 150 },
-  ];
+  ].filter(column => column.field !== 'edit' || isLoggedIn);
   
 
   const paginationModel = { page: 0, pageSize: 5 };
@@ -121,16 +121,16 @@ export default function Dashboard() {
     
     setTableData(rows);
     setTableCount(jsonResponse.data.totalCount);
-    triggerShowTable();
+    triggerIsLoggedIn();
   };
 
-  const triggerShowTable = async() =>{
+  const triggerIsLoggedIn = async() =>{
     const token = await localStorage.getItem('token');
     if(token){
-      setShowTable(true)
+      setIsLoggedIn(true)
       return;
     }
-    setShowTable(false)
+    setIsLoggedIn(false)
     
   }
 
@@ -478,16 +478,23 @@ export default function Dashboard() {
                           position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} 
                           onClick={()=>handleMarkerClick(index)}
                           >
-                             {activeMarker === index ? 
-                                <InfoWindow 
-                                position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.Longitude) }}
-                                onCloseClick={handleMouseOut}>
-                                  <div>
-                                    <h4>{marker.Village}</h4>
-                                    <p>{marker.Location}</p>
-                                  </div>
-                                </InfoWindow>
-                              :null}
+                             
+                             <>
+                              {console.log(activeMarker,index,activeMarker === index)}
+                                {
+                                  activeMarker === index ? 
+                                    <InfoWindow 
+                                    position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.Longitude) }}
+                                    onCloseClick={handleMouseOut}>
+                                      <div>
+                                        <h4>{marker.Village}</h4>
+                                        <p>{marker.Location}</p>
+                                      </div>
+                                    </InfoWindow>
+                                  :null
+                                }
+                             </>
+                             
                           </Marker>
                         )
                       })
@@ -616,6 +623,18 @@ export default function Dashboard() {
             <div className="row">
               <div className="col-6">
                 <div className="filters">
+                <select
+                    value={filters.DISTRICT}
+                    onChange={(e) => {
+                      handleTalukaChange(e);
+                    }}
+                  >
+                    <option value="null">Select District</option>
+                    {picklistValues.district.map((district, index) => (
+                      <option key={index} value={district}>{district}</option>
+                    ))}
+                  </select>
+                  
                   <select
                     value={filters.TALUKA}
                     onChange={(e) => {
@@ -643,12 +662,15 @@ export default function Dashboard() {
               </div>
               <div className="col-4"/>
               <div className="col-2">
-                <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Entry</button>
+              {
+                isLoggedIn ? 
+                <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Record</button>:
+                null
+              }
               </div>
             </div>
          </div>
-         {
-         showTable ? 
+         
          
          <Paper sx={{ height: 400, width: '100%' }}>
             <DataGrid
@@ -661,12 +683,6 @@ export default function Dashboard() {
               experimentalFeatures={{ newEditingApi: true }}
             />
           </Paper>
-         : 
-         <div style={{width:'100%',textAlign:'center',marginTop:25,marginBottom:25}}>
-          <p>You Need to Login to view the Table.</p>
-          <button className="btn btn-primary" onClick={()=>navigate('/login')} style={{width:200,height:35}}>Click Here to Log In</button>
-         </div>
-         } 
         
          <div className="col-12">
            <div class="card" style={{marginTop:10}}>
