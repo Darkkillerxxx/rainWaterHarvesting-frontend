@@ -352,7 +352,7 @@ export default function Dashboard() {
             />
           </div>
           <div className="col-10">
-            <h2 style={{color:'#1ca1e4'}}>Rainwater Harvesting</h2>
+            <h2 style={{color:'#1ca1e4'}}>Rainwater Water Harvesting</h2>
             <h2 style={{color:'#1ca1e4'}}>(State Of Gujarat)</h2>
           </div>
         </div>
@@ -469,6 +469,7 @@ export default function Dashboard() {
                     {
                       mapMarkerList.map((marker,index)=>{
                         return(
+                          <>
                           <Marker 
                           key={index} 
                           title={
@@ -476,26 +477,39 @@ export default function Dashboard() {
                             `
                           } 
                           position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} 
-                          onClick={()=>handleMarkerClick(index)}
-                          >
-                             
-                             <>
+                          onClick={()=>handleMarkerClick(index)}/>
+
+                          <>
                               {console.log(activeMarker,index,activeMarker === index)}
                                 {
                                   activeMarker === index ? 
-                                    <InfoWindow 
+                                  <InfoWindow 
                                     position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.Longitude) }}
                                     onCloseClick={handleMouseOut}>
-                                      <div>
-                                        <h4>{marker.Village}</h4>
-                                        <p>{marker.Location}</p>
+                                      <div class="card" style={{width: 350}}>
+                                        {
+                                          marker.Inauguration_PHOTO1 ? 
+                                          <img class="card-img-top" src={marker.Inauguration_PHOTO1} alt="Card image cap" />
+                                          :
+                                          null
+                                        }
+                                        <div class="card-body">
+                                          <h5 class="card-title" style={{fontSize:15}}>{marker.Location}</h5>
+                                          <p class="card-text" style={{fontSize:12}}>{marker.Village}</p>
+                                          {
+                                            marker.Inauguration_DATE || marker.Inauguration_DATE != '' ?
+                                            <p class="card-text">Inaugration Date : {marker.Inauguration_DATE ? marker.Inauguration_DATE : ''}</p>
+                                            :
+                                            null
+                                          }
+                                        </div>
                                       </div>
+                                      
                                     </InfoWindow>
                                   :null
                                 }
                              </>
-                             
-                          </Marker>
+                          </> 
                         )
                       })
                     }
