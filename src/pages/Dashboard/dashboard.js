@@ -359,7 +359,12 @@ export default function Dashboard() {
             <h2 style={{color:'#1ca1e4'}}>(State Of Gujarat)</h2>
           </div>
           <div className="col-2">
-            <button className="btn btn-primary mt-3" onClick={()=>navigate('/login')}>Click Here to Login</button>
+            {
+              !isLoggedIn ?
+              <button className="btn btn-primary mt-3" onClick={()=>navigate('/login')}>Click Here to Login</button>
+              :
+              null
+            }
           </div>
         </div>
        </div>
