@@ -504,12 +504,20 @@ export default function Dashboard() {
                                           :
                                           null
                                         }
-                                        <div class="card-body">
-                                          <h5 class="card-title" style={{fontSize:15}}>{marker.Location}</h5>
-                                          <p class="card-text" style={{fontSize:12}}>{marker.Village}</p>
+                                        <div class="card-body" style={{textAlign:'left'}}>
+                                          <h5 class="card-title" style={{fontSize:15}}>{marker.District}</h5><br/>
+                                          <span class="card-text" style={{fontSize:12}}>{marker.Taluka}</span><br/>
+                                          <span class="card-text" style={{fontSize:12}}>{marker.Village}</span><br/>
+                                          <span class="card-text" style={{fontSize:12}}>{marker.Location}</span><br/>
                                           {
-                                            marker.Inauguration_DATE || marker.Inauguration_DATE != '' ?
-                                            <p class="card-text">Inaugration Date : {marker.Inauguration_DATE ? marker.Inauguration_DATE : ''}</p>
+                                            marker.Inauguration_DATE && marker.Inauguration_DATE != '' ?
+                                            <p class="card-text mt-2">Inaugration Date : {marker.Inauguration_DATE ? marker.Inauguration_DATE : ''}</p>
+                                            :
+                                            null
+                                          }
+                                          {
+                                            marker.COMPLETED_DATE && marker.COMPLETED_DATE != '' ?
+                                            <p class="card-text">Completion Date : {marker.COMPLETED_DATE ? marker.COMPLETED_DATE : ''}</p>
                                             :
                                             null
                                           }
