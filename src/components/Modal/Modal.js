@@ -10,7 +10,7 @@ const formatDate = (date) => {
     return `${year}-${month}-${day}`;
   };
   
-  const MyModal = ({ picklistOptions, rowData }) => {
+  const MyModal = ({ picklistOptions, rowData, triggerModalVisibility }) => {
     const [show, setShow] = useState(true);
   
     // Initialize formData with selectedData (default values)
@@ -33,7 +33,10 @@ const formatDate = (date) => {
       village: [],
     });
   
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShow(false)
+        triggerModalVisibility();
+    };
     const handleShow = () => setShow(true);
 
     // Helper to convert file to base64

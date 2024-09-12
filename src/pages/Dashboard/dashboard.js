@@ -90,6 +90,9 @@ export default function Dashboard() {
     setShowModal(true);
   }
 
+  const triggerModal = () =>{
+    setShowModal(!showModal);
+  }
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
@@ -724,7 +727,7 @@ export default function Dashboard() {
            {
           showModal ? 
             <div className="col-12" style={{display:'flex',justifyContent:'center'}}>
-                <Modal rowData={selectedData} picklistOptions={picklistValues}/>
+                <Modal triggerModalVisibility={triggerModal} rowData={selectedData} picklistOptions={picklistValues}/>
             </div>
             :
             null
