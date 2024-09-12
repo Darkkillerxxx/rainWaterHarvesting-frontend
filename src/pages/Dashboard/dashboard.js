@@ -13,8 +13,8 @@ import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
 import { Carousel } from 'react-bootstrap';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
-import { isEditable } from "@testing-library/user-event/dist/utils";
-
+import { Button } from '@mui/material';
+import Modal from '../../components/Modal/Modal.js'
 
 
 export default function Dashboard() {
@@ -41,6 +41,9 @@ export default function Dashboard() {
     taluka: [],
     village: [],
   });
+  const [selectedData,setSelectedData] = useState(null)
+  const [showModal,setShowModal] = useState(false);
+
   const [showTable,setShowTable] = useState(true)
   const [activeMarker, setActiveMarker] = useState(null);
   const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
@@ -48,23 +51,44 @@ export default function Dashboard() {
   const itemsPerPage = 10;
 
   const columns = [
+    {
+      field: 'edit',
+      headerName: 'Edit',
+      width: 100,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={() => 
+          {
+            console.log(params.row);
+            handleEditClick(params.row)
+          }
+        }
+        >
+          Edit
+        </Button>
+      ),
+    },
     { field: 'id', headerName: 'ID', width: 70, editable: true },
     { field: 'district', headerName: 'District', width: 130, editable: true },
     { field: 'taluka', headerName: 'Taluka', width: 130, editable: true },
     { field: 'village', headerName: 'Village', width: 130, editable: true },
     { field: 'location', headerName: 'Location', width: 130, editable: true },
     { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: true },
-    { field: 'inaugurationPhoto', headerName: 'Inauguration Photo', width: 150, editable: true },
+    { field: 'inaugurationPhoto', headerName: 'Inauguration Photo', width: 150},
     { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: true },
-    { field: 'completionPhoto', headerName: 'Completion Photo', width: 150, editable: true },
+    { field: 'completionPhoto', headerName: 'Completion Photo', width: 150 },
   ];
   
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  useEffect(()=>{
-
-  },[])
+  const handleEditClick = (data) =>{
+    setSelectedData({...data});
+    setShowModal(true);
+  }
 
 
   const fetchData = async () => {
@@ -88,10 +112,12 @@ export default function Dashboard() {
       village: data.VILLAGE,
       location: data.ENG_LOCATION || data.LOCATION,  // Use either the English location or the location field
       inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,
-      inaugurationPhoto: data.Inauguration_PHOTO1 ? new Date(data.Inauguration_PHOTO1) : null,
+      inaugurationPhoto: data.Inauguration_PHOTO1 ? data.Inauguration_PHOTO1 : null,
       completionDate: data.COMPLETED_DATE ? new Date(data.COMPLETED_DATE) : null,
-      completionPhoto: data.COMPLETED_PHOTO1 ? new Date(data.COMPLETED_PHOTO1) : null,  // Parse the date
+      completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,  // Parse the date
     }));
+
+    console.log(rows);
     
     setTableData(rows);
     setTableCount(jsonResponse.data.totalCount);
@@ -289,8 +315,9 @@ export default function Dashboard() {
       VILLAGE: newRow.village, // Assuming you want the English village name, or you can add gVILLAGE if necessary
       ENG_LOCATION: newRow.location, // Maps to location
       Inauguration_DATE: newRow.inaugurationDate, // Maps to the date field
-      ENG_GRANT: newRow.engGrant, // Maps to English Grant
-      Labour: newRow.labour || null, // If labour exists, otherwise null
+      Inauguration_PHOTO1:newRow.inaugurationPhoto,
+      COMPLETED_DATE: newRow.completionDate, // Maps to English Grant
+      COMPLETED_PHOTO1: newRow.completionPhoto || null, // If labour exists, otherwise null
       IMPLIMANTATION_AUTHORITY: newRow.implementationAuthority || null, // If authority exists, otherwise null
       // Add any other fields that might be needed from the original object
     }
@@ -325,7 +352,8 @@ export default function Dashboard() {
             />
           </div>
           <div className="col-10">
-            <h1 style={{color:'#1ca1e4'}}>Rainwater Harvesting For State Of Gujarat</h1>
+            <h2 style={{color:'#1ca1e4'}}>Rainwater Harvesting</h2>
+            <h2 style={{color:'#1ca1e4'}}>(State Of Gujarat)</h2>
           </div>
         </div>
        </div>
@@ -628,7 +656,6 @@ export default function Dashboard() {
               columns={columns}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
               sx={{ border: 0 }}
               processRowUpdate={processRowUpdate}
               experimentalFeatures={{ newEditingApi: true }}
@@ -663,10 +690,17 @@ export default function Dashboard() {
                }}
              />
            </div>
+
+           {
+          showModal ? 
+            <div className="col-12" style={{display:'flex',justifyContent:'center'}}>
+                <Modal rowData={selectedData} picklistOptions={picklistValues}/>
+            </div>
+            :
+            null
+          }
          </div>
-         {/* <div className="col-12" style={{marginTop:10}}>
-          <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Entry</button>
-         </div> */}
+        
        </div>
      </div>
     : 

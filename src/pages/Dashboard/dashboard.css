@@ -25,6 +25,26 @@
   place-items: center;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* optional, to darken background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 50%; /* Adjust the width based on the size you want */
+  max-width: 600px;
+}
+
 /* .city-banner h1 { */
 /*   grid-column-start: 2; */
 /* } */

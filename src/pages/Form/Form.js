@@ -105,7 +105,6 @@ const Form = () => {
       DISTRICT,
       TALUKA,
       VILLAGE,
-      // mobile,
       LOCATION,
       Inauguration_DATE,
       Latitude,
@@ -117,7 +116,7 @@ const Form = () => {
 
     axios
       .post(
-        "https://rainwaterharvesting-backend.onrender.com/createRecords",
+        "http://localhost:3000/createRecords",
         data,
       )
       .then((res) => {
