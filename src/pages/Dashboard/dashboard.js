@@ -494,37 +494,36 @@ export default function Dashboard() {
                               {console.log(activeMarker,index,activeMarker === index)}
                                 {
                                   activeMarker === index ? 
-                                  <InfoWindow 
-                                    position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.Longitude) }}
-                                    onCloseClick={handleMouseOut}>
-                                      <div class="card" style={{width: 350}}>
-                                        {
-                                          marker.Inauguration_PHOTO1 ? 
-                                          <img class="card-img-top" src={marker.Inauguration_PHOTO1} alt="Card image cap" />
-                                          :
-                                          null
-                                        }
-                                        <div class="card-body" style={{textAlign:'left'}}>
-                                          <h5 class="card-title" style={{fontSize:15}}>{marker.District}</h5><br/>
-                                          <span class="card-text" style={{fontSize:12}}>{marker.Taluka}</span><br/>
-                                          <span class="card-text" style={{fontSize:12}}>{marker.Village}</span><br/>
-                                          <span class="card-text" style={{fontSize:12}}>{marker.Location}</span><br/>
-                                          {
-                                            marker.Inauguration_DATE && marker.Inauguration_DATE != '' ?
-                                            <p class="card-text mt-2">Inaugration Date : {marker.Inauguration_DATE ? marker.Inauguration_DATE : ''}</p>
-                                            :
-                                            null
-                                          }
-                                          {
-                                            marker.COMPLETED_DATE && marker.COMPLETED_DATE != '' ?
-                                            <p class="card-text">Completion Date : {marker.COMPLETED_DATE ? marker.COMPLETED_DATE : ''}</p>
-                                            :
-                                            null
-                                          }
-                                        </div>
-                                      </div>
-                                      
-                                    </InfoWindow>
+                                  <div className="card"
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)', // Center the InfoWindow
+                                    width: '300px',
+                                    backgroundColor: 'white',
+                                    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+                                    borderRadius: '5px',
+                                    padding: '15px',
+                                    zIndex: 1000,
+                                  }}
+                                >
+                                    {mapMarkerList[activeMarker].Inauguration_PHOTO1 ? (
+                                      <img class="card-img-top" src={mapMarkerList[activeMarker].Inauguration_PHOTO1} alt="Card image cap" />
+                                    ) : null}
+                                    <div class="card-body" style={{ textAlign: 'left' }}>
+                                      <h5 class="card-title" style={{ fontSize: 15 }}>{mapMarkerList[activeMarker].District}</h5><br />
+                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Taluka}</span><br />
+                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Village}</span><br />
+                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Location}</span><br />
+                                      {mapMarkerList[activeMarker].Inauguration_DATE && (
+                                        <p class="card-text mt-2">GroundWork Date: {mapMarkerList[activeMarker].Inauguration_DATE}</p>
+                                      )}
+                                      {mapMarkerList[activeMarker].COMPLETED_DATE && (
+                                        <p class="card-text">Completion Date: {mapMarkerList[activeMarker].COMPLETED_DATE}</p>
+                                      )}
+                                    </div>
+                                </div>
                                   :null
                                 }
                              </>
