@@ -460,7 +460,7 @@ export default function Dashboard() {
                 <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
                   <Map
                   style={{ borderRadius: "20px",height:500 }}
-                  defaultZoom={8}
+                  defaultZoom={12}
                   defaultCenter={{
                     lat: 21.1702,
                     lng: 72.8311,
