@@ -347,24 +347,28 @@ export default function Dashboard() {
        
        <div style={{marginBottom:50}}>
         <div className="row"> 
-          <div className="col-2">
+          <div className="col-1">
             <img
-              src="./logo.jpeg"
-              alt="Map of Surat"
-              style={{ height: "80px", width: "100%", objectFit: "contain",marginTop:10 }}
+              src="./smjt.png"
+              style={{ height: "90px", width: "100%", objectFit: "contain",marginTop:10 }}
             />
           </div>
-          <div className="col-8">
-            <h2 style={{color:'#1ca1e4'}}>Rainwater Water Harvesting</h2>
-            <h2 style={{color:'#1ca1e4'}}>(State Of Gujarat)</h2>
+          <div className="col-10">
+            <h3 style={{color:'#1ca1e4'}}>जल संचय जन बघिदारी</h3>
+            <h5>पेयजल एवं स्वच्छता विभाग</h5>
+            <h5>जल शक्ति मंत्रालय</h5>
           </div>
-          <div className="col-2">
-            {
+          <div className="col-1">
+            <img
+              src="./logo.jpeg"
+              style={{ height: "90px", width: "100%", objectFit: "contain",marginTop:10 }}
+            />
+            {/* {
               !isLoggedIn ?
               <button className="btn btn-primary mt-3" onClick={()=>navigate('/login')}>Click Here to Login</button>
               :
               null
-            }
+            } */}
           </div>
         </div>
        </div>
