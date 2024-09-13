@@ -76,8 +76,8 @@ export default function Dashboard() {
     { field: 'taluka', headerName: 'Taluka', width: 130, editable: false },
     { field: 'village', headerName: 'Village', width: 130, editable: false },
     { field: 'location', headerName: 'Location', width: 130, editable: false },
-    { field: 'inaugurationDate', headerName: 'Inauguration Date', type: 'date', width: 150, editable: false },
-    { field: 'inaugurationPhoto', headerName: 'Inauguration Photo', width: 150},
+    { field: 'inaugurationDate', headerName: 'GroundWork Date', type: 'date', width: 150, editable: false },
+    { field: 'inaugurationPhoto', headerName: 'GroundWork Photo', width: 150},
     { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: false },
     { field: 'completionPhoto', headerName: 'Completion Photo', width: 150 },
   ].filter(column => column.field !== 'edit' || isLoggedIn);
@@ -350,13 +350,14 @@ export default function Dashboard() {
           <div className="col-1">
             <img
               src="./smjt.png"
-              style={{ height: "90px", width: "100%", objectFit: "contain",marginTop:10 }}
+              style={{ height: "100px", width: "100%", objectFit: "contain",marginTop:10 }}
             />
           </div>
           <div className="col-10">
-            <h3 style={{color:'#1ca1e4'}}>जल संचय जन बघिदारी</h3>
-            <h5>पेयजल एवं स्वच्छता विभाग</h5>
-            <h5>जल शक्ति मंत्रालय</h5>
+            <h2 style={{color:'#1ca1e4',fontStyle:'oblique'}}>जल संचय जन भागीदारी</h2>
+            <h5>पेयजल एवं स्वच्छता विभाग, जल शक्ति मंत्रालय</h5>
+            <h5>सूरत, गुजरात राज्य</h5>
+
           </div>
           <div className="col-1">
             <img
@@ -439,7 +440,7 @@ export default function Dashboard() {
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
-                   <div style={{fontSize:10}} class="card-text">Inaugrations</div>
+                   <div style={{fontSize:10}} class="card-text">GroundWork</div>
                    <h4 class="card-title">{dashboardData.inaugrationCount}</h4>
                  </div>
                </div>
@@ -488,7 +489,7 @@ export default function Dashboard() {
                           <Marker 
                           key={index} 
                           title={
-                            `Village:${marker.Village}, Location:${marker.Location} , Inauguration Date : ${marker.Inauguration_DATE ? marker.Inauguration_DATE : null}
+                            `Village:${marker.Village}, Location:${marker.Location} , GroundWork Date : ${marker.Inauguration_DATE ? marker.Inauguration_DATE : null}
                             `
                           } 
                           position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} 
@@ -634,7 +635,7 @@ export default function Dashboard() {
          </div>
          <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
            <div class="card" style={{marginTop:10,height:250}}>
-             <h5 class="card-title">Inaugrations & Completion Status (in %)</h5>
+             <h5 class="card-title">GroundWork & Completion Status (in %)</h5>
              <div style={{display:'flex',width:'100%',alignContent:'center',justifyContent:'center'}}>
                <Chart
                    chartType="Gauge"
@@ -701,7 +702,7 @@ export default function Dashboard() {
               {
                 isLoggedIn ? 
                 <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Record</button>:
-                null
+                <button type="button" onClick={()=> navigate('/login')} class="btn btn-primary w-100">Login to Edit/Create</button>
               }
               </div>
             </div>
