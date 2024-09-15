@@ -128,21 +128,26 @@ export default function Dashboard() {
   };
 
   const triggerIsLoggedIn = async() =>{
-    const token = await localStorage.getItem('token');
-    if(token){
+    let userData = await localStorage.getItem('userData');
+    if(userData){
+      userData = JSON.parse(userData);
+      if(filters.TALUKA != userData.taluka){
+        setFilters({...filters,TALUKA:userData.taluka})
+      }
       setIsLoggedIn(true)
       return;
     }
     setIsLoggedIn(false)
-    
   }
 
   useEffect(()=>{
+    console.log(142);
     fetchData();
   },[])
 
   useEffect(() => {
     if(filters.DISTRICT || filters.TALUKA || filters.VILLAGE){
+      console.log(148);
       fetchData();
     }
   }, [filters]);
@@ -222,6 +227,9 @@ export default function Dashboard() {
 
       const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
       const talukaValues = [...new Set(data.data.map(item => item.TALUKA))];
+
+      await localStorage.setItem('Talukas',talukaValues.toString());
+
       const villageValues = [...new Set(data.data.map(item => item.VILLAGE))];
   
       setPicklistValues({
@@ -338,6 +346,14 @@ export default function Dashboard() {
   const handleMouseOut = () => {
     setActiveMarker(null);
   };
+
+  const checkIfTalukaAssignedToUser = async()=>{
+    const userData = await localStorage.getItem('userData');
+    if(userData && userData.taluka){
+      return true;
+    }
+    return false;
+  }
   
   
   return (
@@ -470,9 +486,9 @@ export default function Dashboard() {
           <div className="row">
             <div className="col-xl-6 col-l-6 col-m-6 col-xs-12">
               <div className="card mb-2" style={{height:500}}>
-                <APIProvider apiKey='AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM'>
-                  <Map
-                  style={{ borderRadius: "20px",height:500 }}
+              <APIProvider apiKey="AIzaSyBucoqzCbZyvxNFD3JzxPHDEH5BSkIcOTM">
+                <Map
+                  style={{ borderRadius: "20px", height: 500 }}
                   defaultZoom={12}
                   defaultCenter={{
                     lat: 21.1702,
@@ -481,63 +497,101 @@ export default function Dashboard() {
                   gestureHandling={"greedy"}
                   disableDefaultUI
                   renderingType="RASTER"
-                  >
-                    {
-                      mapMarkerList.map((marker,index)=>{
-                        return(
-                          <>
-                          <Marker 
-                          key={index} 
-                          title={
-                            `Village:${marker.Village}, Location:${marker.Location} , GroundWork Date : ${marker.Inauguration_DATE ? marker.Inauguration_DATE : null}
-                            `
-                          } 
-                          position={{lat:parseFloat(marker.Latitude),lng:parseFloat(marker.longitude)}} 
-                          onClick={()=>handleMarkerClick(index)}/>
+                >
+                  {mapMarkerList.map((marker, index) => {
+                    return (
+                      <>
+                        <Marker
+                          key={index}
+                          title={`Village:${marker.Village}, Location:${marker.Location} , GroundWork Date : ${
+                            marker.Inauguration_DATE ? marker.Inauguration_DATE : null
+                          }`}
+                          position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.longitude) }}
+                          onClick={() => handleMarkerClick(index)}
+                        />
 
-                          <>
-                              {console.log(activeMarker,index,activeMarker === index)}
-                                {
-                                  activeMarker === index ? 
-                                  <div className="card"
-                                  style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)', // Center the InfoWindow
-                                    width: '300px',
-                                    backgroundColor: 'white',
-                                    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
-                                    borderRadius: '5px',
-                                    padding: '15px',
-                                    zIndex: 1000,
-                                  }}
-                                >
-                                    {mapMarkerList[activeMarker].Inauguration_PHOTO1 ? (
-                                      <img class="card-img-top" src={mapMarkerList[activeMarker].Inauguration_PHOTO1} alt="Card image cap" />
-                                    ) : null}
-                                    <div class="card-body" style={{ textAlign: 'left' }}>
-                                      <h5 class="card-title" style={{ fontSize: 15 }}>{mapMarkerList[activeMarker].District}</h5><br />
-                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Taluka}</span><br />
-                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Village}</span><br />
-                                      <span class="card-text" style={{ fontSize: 12 }}>{mapMarkerList[activeMarker].Location}</span><br />
-                                      {mapMarkerList[activeMarker].Inauguration_DATE && (
-                                        <p class="card-text mt-2">GroundWork Date: {mapMarkerList[activeMarker].Inauguration_DATE}</p>
-                                      )}
-                                      {mapMarkerList[activeMarker].COMPLETED_DATE && (
-                                        <p class="card-text">Completion Date: {mapMarkerList[activeMarker].COMPLETED_DATE}</p>
-                                      )}
-                                    </div>
-                                </div>
-                                  :null
-                                }
-                             </>
-                          </> 
-                        )
-                      })
-                    }
-                  </Map>
-                </APIProvider>
+                        <>
+                          {activeMarker === index ? (
+                            <div
+                              className="card"
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)", // Center the InfoWindow
+                                width: "300px",
+                                backgroundColor: "white",
+                                boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+                                borderRadius: "5px",
+                                padding: "15px",
+                                zIndex: 1000,
+                              }}
+                            >
+                              {/* Close button */}
+                              <button
+                                onClick={() => setActiveMarker(null)} // Reset activeMarker to close the card
+                                style={{
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  background: "none",
+                                  border: "none",
+                                  fontSize: "16px",
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                  width:"30px",
+                                  color:'black',
+                                  alignSelf:'end',
+                                  marginTop:'10px'
+                                }}
+                              >
+                                X
+                              </button>
+
+                              {mapMarkerList[activeMarker].Inauguration_PHOTO1 ? (
+                                <img
+                                  className="card-img-top"
+                                  src={mapMarkerList[activeMarker].Inauguration_PHOTO1}
+                                  alt="Card image cap"
+                                />
+                              ) : null}
+                              <div className="card-body" style={{ textAlign: "left" }}>
+                                <h5 className="card-title" style={{ fontSize: 15 }}>
+                                  {mapMarkerList[activeMarker].District}
+                                </h5>
+                                <br />
+                                <span className="card-text" style={{ fontSize: 12 }}>
+                                  {mapMarkerList[activeMarker].Taluka}
+                                </span>
+                                <br />
+                                <span className="card-text" style={{ fontSize: 12 }}>
+                                  {mapMarkerList[activeMarker].Village}
+                                </span>
+                                <br />
+                                <span className="card-text" style={{ fontSize: 12 }}>
+                                  {mapMarkerList[activeMarker].Location}
+                                </span>
+                                <br />
+                                {mapMarkerList[activeMarker].Inauguration_DATE && (
+                                  <span className="card-text mt-2" style={{ fontSize: 12 }}>
+                                    GroundWork Date: {mapMarkerList[activeMarker].Inauguration_DATE}
+                                  </span>
+                                )}
+                                {mapMarkerList[activeMarker].COMPLETED_DATE && (
+                                  <span className="card-text" style={{ fontSize: 12 }}>
+                                    Completion Date: {mapMarkerList[activeMarker].COMPLETED_DATE}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </>
+                      </>
+                    );
+                  })}
+                </Map>
+              </APIProvider>
+
               </div>
             </div>
             <div className="col-xl-6 col-l-6 col-m-6 col-xs-12">
@@ -636,77 +690,198 @@ export default function Dashboard() {
          <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
            <div class="card" style={{marginTop:10,height:250}}>
              <h5 class="card-title">GroundWork & Completion Status (in %)</h5>
-             <div style={{display:'flex',width:'100%',alignContent:'center',justifyContent:'center'}}>
-               <Chart
-                   chartType="Gauge"
-                   width="80%"
-                   data={gaugeValue}
-                   options={{
-                     width: 500,
-                     height: 150,
-                     redFrom: 90,
-                     redTo: 100,
-                     yellowFrom: 75,
-                     yellowTo: 90,
-                     minorTicks: 5,
-                   }}
-                 />
-             </div>
+             <div
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Chart
+                  chartType="Gauge"
+                  width="80%"
+                  data={gaugeValue}
+                  options={{
+                    width: 500,
+                    height: 150,
+                    redFrom: 90,
+                    redTo: 100,
+                    yellowFrom: 75,
+                    yellowTo: 90,
+                    minorTicks: 5,
+                  }}
+                />
+                <style>
+                  {`
+                    @media (max-width: 768px) {
+                      div {
+                        justify-content: flex-start !important;
+                        padding-left: 10px;
+                      }
+                    }
+                  `}
+                </style>
+              </div>
            </div>
          </div>
          
          {/* Insert Table Here */}
-         <div className="col-12 mt-4 mb-2">
+         <div className="col-12 mt-4 mb-2 d-none d-sm-block">
             <div className="row">
-              <div className="col-6">
-                <div className="filters">
-                <select
-                    value={filters.DISTRICT}
-                    onChange={(e) => {
-                      handleTalukaChange(e);
-                    }}
-                  >
-                    <option value="null">Select District</option>
-                    {picklistValues.district.map((district, index) => (
-                      <option key={index} value={district}>{district}</option>
-                    ))}
-                  </select>
+                  <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
+                    <select
+                      value={filters.DISTRICT}
+                      onChange={(e) => {
+                        handleTalukaChange(e);
+                      }}
+                    >
+                      <option value="null">Select District</option>
+                      {picklistValues.district.map((district, index) => (
+                        <option key={index} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   
-                  <select
-                    value={filters.TALUKA}
-                    onChange={(e) => {
-                      handleTalukaChange(e);
-                    }}
-                  >
-                    <option value="null">Select Taluka</option>
-                    {picklistValues.taluka.map((taluka, index) => (
-                      <option key={index} value={taluka}>{taluka}</option>
-                    ))}
-                  </select>
+                  {/* {
+                    !checkIfTalukaAssignedToUser() ?
+                    <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
+                      <select
+                        value={filters.TALUKA}
+                        onChange={(e) => {
+                          handleTalukaChange(e);
+                        }}
+                      >
+                        <option value="null">Select Taluka</option>
+                        {picklistValues.taluka.map((taluka, index) => (
+                          <option key={index} value={taluka}>
+                            {taluka}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    :
+                    null
+                  } */}
+                
 
-                  <select
-                    value={filters.VILLAGE}
-                    onChange={(e) => {
-                      setFilters({ ...filters, VILLAGE: e.target.value });
-                    }}
-                  >
-                    <option value="null">Select Village</option>
-                    {picklistValues.village.map((village, index) => (
-                      <option key={index} value={village}>{village}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="col-4"/>
-              <div className="col-2">
-              {
-                isLoggedIn ? 
-                <button type="button" onClick={()=> navigateToRecordCreation()} class="btn btn-primary w-100">Create New Record</button>:
-                <button type="button" onClick={()=> navigate('/login')} class="btn btn-primary w-100">Login to Edit/Create</button>
-              }
-              </div>
+                  <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
+                    <select
+                      value={filters.VILLAGE}
+                      onChange={(e) => {
+                        setFilters({ ...filters, VILLAGE: e.target.value });
+                      }}
+                    >
+                      <option value="null">Select Village</option>
+                      {picklistValues.village.map((village, index) => (
+                        <option key={index} value={village}>
+                          {village}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-xs-6 mb-4">
+                    {isLoggedIn ? (
+                      <button
+                        type="button"
+                        onClick={() => navigateToRecordCreation()}
+                        className="btn btn-primary w-100"
+                      >
+                        Create New Record
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/login')}
+                        className="btn btn-primary w-100"
+                      >
+                        Login to Edit/Create
+                      </button>
+                    )}
+                  </div>
+
             </div>
          </div>
+
+
+
+         <div className="col-12 mt-4 mb-2 d-block d-sm-none">
+          <div className="row">
+            <div className="col-6 mb-2">
+              <select
+                value={filters.DISTRICT}
+                onChange={(e) => {
+                  handleTalukaChange(e);
+                }}
+              >
+                <option value="null">Select District</option>
+                {picklistValues.district.map((district, index) => (
+                  <option key={index} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-6 mb-2">
+              <select
+                value={filters.TALUKA}
+                onChange={(e) => {
+                  handleTalukaChange(e);
+                }}
+              >
+                <option value="null">Select Taluka</option>
+                {picklistValues.taluka.map((taluka, index) => (
+                  <option key={index} value={taluka}>
+                    {taluka}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-6 mb-2">
+              <select
+                value={filters.VILLAGE}
+                onChange={(e) => {
+                  setFilters({ ...filters, VILLAGE: e.target.value });
+                }}
+              >
+                <option value="null">Select Village</option>
+                {picklistValues.village.map((village, index) => (
+                  <option key={index} value={village}>
+                    {village}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-6 mb-2">
+              {isLoggedIn ? (
+                <button
+                  type="button"
+                  style={{ height: 40, fontSize: 12 }}
+                  onClick={() => navigateToRecordCreation()}
+                  className="btn btn-primary w-100"
+                >
+                  Create New Record
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  style={{ height: 40, fontSize: 12 }}
+                  onClick={() => navigate('/login')}
+                  className="btn btn-primary w-100"
+                >
+                  Login to Edit/Create
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
          
          
          <Paper sx={{ height: 400, width: '100%' }}>
@@ -753,7 +928,6 @@ export default function Dashboard() {
             null
           }
          </div>
-        
        </div>
      </div>
     : 
