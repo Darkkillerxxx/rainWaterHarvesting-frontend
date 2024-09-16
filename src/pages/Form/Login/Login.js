@@ -19,6 +19,7 @@ export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [taluka,setTaluka] = useState(null);
+  const [district,setDistrict] = useState(null);
   const [talukaList,setTalukaList] = useState([]);
   const [error, setError] = useState("");
 
@@ -26,7 +27,8 @@ export const Login = () => {
     const loginDetails = {
       username,
       password,
-      taluka
+      taluka,
+      district
     };
 
     try {
@@ -84,6 +86,21 @@ export const Login = () => {
             }
             <form onSubmit={handleLogin}>
               {/* Email input */}
+
+              <label className="form-label" htmlFor="form3Example3">
+                  Select District
+              </label>
+              <div className="form-outline mb-4">
+              <select
+                  value={district}
+                  onChange={(e) => {
+                    setDistrict(e.target.value)
+                  }}>
+                    <option value="null">Select District</option>
+                    <option value="Surat">Surat</option>
+                </select>
+              </div>
+
               <label className="form-label" htmlFor="form3Example3">
                   Select Taluka
               </label>
@@ -131,24 +148,6 @@ export const Login = () => {
               
               </div>
 
-              <div className="d-flex justify-content-between align-items-center">
-                {/* Checkbox */}
-                <div className="form-check mb-0">
-                  <input
-                    className="form-check-input me-2"
-                    type="checkbox"
-                    value=""
-                    id="form2Example3"
-                  />
-                  <label className="form-check-label" htmlFor="form2Example3">
-                    Remember me
-                  </label>
-                </div>
-                <a href="#!" className="text-body">
-                  Forgot password?
-                </a>
-              </div>
-
               <div className="text-center text-lg-start mt-4 pt-2">
                 <button
                   type="button"
@@ -158,12 +157,6 @@ export const Login = () => {
                 >
                   Login
                 </button>
-                <p className="small fw-bold mt-2 pt-1 mb-0">
-                  Don't have an account?{" "}
-                  <a href="#!" className="link-danger">
-                    Register
-                  </a>
-                </p>
               </div>
             </form>
           </div>

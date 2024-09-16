@@ -12,7 +12,9 @@ const formatDate = (date) => {
   
   const MyModal = ({ picklistOptions, rowData, triggerModalVisibility }) => {
     const [show, setShow] = useState(true);
-  
+    const [location, setLocation] = useState({ latitude: null, longitude: null });
+    const [error, setError] = useState(null);
+
     // Initialize formData with selectedData (default values)
     const [formData, setFormData] = useState({
       district: '',
@@ -74,8 +76,17 @@ const formatDate = (date) => {
           Inauguration_DATE: formData.inaugurationDate,
           inaugurationPhotoBase64: formData.inaugurationPhotoBase64, // base64 encoded image
           COMPLETED_DATE: formData.completionDate,
-          completionPhotoBase64: formData.completionPhotoBase64, // base64 encoded image
+          completionPhotoBase64: formData.completionPhotoBase64,
+          Latitude:location.latitude,
+          Longitude:location.longitude // base64 encoded image
         };
+
+        Object.keys(mappedData).forEach((key)=>{
+          console.log(81,mappedData[key]);
+          if(!mappedData[key] && mappedData[key]?.length === 0){
+            delete mappedData[key]
+          }
+        })
       
         console.log(mappedData);
       
@@ -116,9 +127,30 @@ const formatDate = (date) => {
       });
     }, [picklistOptions, rowData]);
 
+
+  const handleLocationCapture = (e) => {
+    e.preventDefault();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+          setError(null); // Clear any previous errors
+          alert('Location Updated');
+        },
+        (error) => {
+          setError('Error retrieving location. Please try again.');
+          console.error(error);
+        }
+      );
+    } else {
+      setError('Geolocation is not supported by this browser.');
+    }
+  };
+
   return (
     <>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} style={{maxWidth:'100%',width:'100%'}}>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
             {/* District Picklist */}
@@ -130,12 +162,7 @@ const formatDate = (date) => {
                 value={formData.district} // Set the value to selected data
                 onChange={handleChange}
               >
-                <option value="">Select District</option>
-                {picklistValues.district.map((district, index) => (
-                  <option key={index} value={district}>
-                    {district}
-                  </option>
-                ))}
+                <option value="">{formData.district}</option>
               </Form.Control>
             </Form.Group>
 
@@ -148,12 +175,7 @@ const formatDate = (date) => {
                 value={formData.taluka} // Set the value to selected data
                 onChange={handleChange}
               >
-                <option value="">Select Taluka</option>
-                {picklistValues.taluka.map((taluka, index) => (
-                  <option key={index} value={taluka}>
-                    {taluka}
-                  </option>
-                ))}
+                <option value="">{formData.taluka}</option>
               </Form.Control>
             </Form.Group>
 
@@ -166,12 +188,7 @@ const formatDate = (date) => {
                 value={formData.village} // Set the value to selected data
                 onChange={handleChange}
               >
-                <option value="">Select Village</option>
-                {picklistValues.village.map((village, index) => (
-                  <option key={index} value={village}>
-                    {village}
-                  </option>
-                ))}
+                <option value="">{formData.village}</option>
               </Form.Control>
             </Form.Group>
 
@@ -189,7 +206,7 @@ const formatDate = (date) => {
 
             {/* Inauguration Date */}
             <Form.Group controlId="inaugurationDate" style={{ marginBottom: 10 }}>
-              <Form.Label>Inauguration Date</Form.Label>
+              <Form.Label>Groundwork Date</Form.Label>
               <Form.Control
                 type="date"
                 name="inaugurationDate"
@@ -200,7 +217,7 @@ const formatDate = (date) => {
 
             {/* Inauguration Photo */}
             <Form.Group controlId="inaugurationPhoto" style={{ marginBottom: 10 }}>
-              <Form.Label>Inauguration Photo</Form.Label>
+              <Form.Label>Groundwork Photo</Form.Label>
               <Form.Control
                 type="file"
                 name="inaugurationPhoto"
@@ -210,7 +227,7 @@ const formatDate = (date) => {
               {formData.inaugurationPhotoBase64 && (
                 <Image
                   src={formData.inaugurationPhotoBase64}
-                  alt="Inauguration Preview"
+                  alt="Groundwork Preview"
                   thumbnail
                   style={{ marginTop: 10 }}
                 />
@@ -242,7 +259,7 @@ const formatDate = (date) => {
                 />
               )}
             </Form.Group>
-
+            <button className='btn btn-primary w-50 mb-3' onClick={handleLocationCapture}>Update Location</button>
             {/* Submit Button */}
             <Button variant="primary" type="submit">
               Submit

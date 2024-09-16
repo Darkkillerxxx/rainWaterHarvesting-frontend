@@ -9,12 +9,17 @@ import { TbTargetArrow } from "react-icons/tb";
 import { GiInauguration } from "react-icons/gi";
 import { FaRegThumbsUp } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import { CiLogin } from "react-icons/ci";
 import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
 import { Carousel } from 'react-bootstrap';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Button } from '@mui/material';
 import Modal from '../../components/Modal/Modal.js'
+import ImageModal from '../../components/Modal/ImageModal.js'
+
+//https://rainwaterharvesting-backend.onrender.com
+//http://103.116.176.242:3000
 
 
 export default function Dashboard() {
@@ -41,12 +46,16 @@ export default function Dashboard() {
     taluka: [],
     village: [],
   });
+  const [username,setUsername] = useState(null);
   const [selectedData,setSelectedData] = useState(null)
   const [showModal,setShowModal] = useState(false);
 
   const [isLoggedIn,setIsLoggedIn] = useState(true)
   const [activeMarker, setActiveMarker] = useState(null);
   const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
+  const [showImagePopUp,setImagePopUp] = useState(false);
+  const [imagePopUpURL,setImagePopUpURL] = useState(null);
+  const [isTalukaAssignedToUser,setIsTalukaAssignedToUser] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -77,9 +86,51 @@ export default function Dashboard() {
     { field: 'village', headerName: 'Village', width: 130, editable: false },
     { field: 'location', headerName: 'Location', width: 130, editable: false },
     { field: 'inaugurationDate', headerName: 'GroundWork Date', type: 'date', width: 150, editable: false },
-    { field: 'inaugurationPhoto', headerName: 'GroundWork Photo', width: 150},
     { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: false },
-    { field: 'completionPhoto', headerName: 'Completion Photo', width: 150 },
+    {
+      field: 'inaugurationPhoto',
+      headerName: 'GroundWork Photo',
+      width: 150,
+      renderCell: (params) => (
+        params.row.inaugurationPhoto ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => {
+              setImagePopUp(true)
+              setImagePopUpURL(params.row.inaugurationPhoto)
+            }}
+          >
+            View Image
+          </Button>
+        ) : (
+          <span>No Image</span> // Optional placeholder when no image is available
+        )
+      ),
+    },
+    {
+      field: 'completionPhoto',
+      headerName: 'Completion Photo',
+      width: 150,
+      renderCell: (params) => (
+        params.row.completionPhoto ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => {
+              setImagePopUp(true)
+              setImagePopUpURL(params.row.completionPhoto)
+            }}
+          >
+            View Image
+          </Button>
+        ) : (
+          <span>No Image</span> // Optional placeholder when no image is available
+        )
+      ),
+    }
   ].filter(column => column.field !== 'edit' || isLoggedIn);
   
 
@@ -131,6 +182,8 @@ export default function Dashboard() {
     let userData = await localStorage.getItem('userData');
     if(userData){
       userData = JSON.parse(userData);
+      setUsername(userData.user);
+
       if(filters.TALUKA != userData.taluka){
         setFilters({...filters,TALUKA:userData.taluka})
       }
@@ -143,6 +196,7 @@ export default function Dashboard() {
   useEffect(()=>{
     console.log(142);
     fetchData();
+    checkIfTalukaAssignedToUser();
   },[])
 
   useEffect(() => {
@@ -151,6 +205,10 @@ export default function Dashboard() {
       fetchData();
     }
   }, [filters]);
+
+  const triggerImageModalVisibility = () =>{
+    setImagePopUp(!showImagePopUp)
+  }
 
   const fetchDashboardvalues = async() =>{
     try{
@@ -163,7 +221,7 @@ export default function Dashboard() {
       const gaugeInitialValue = [["Label","value"]]
       setGaugeValue([...gaugeInitialValue]);
 
-      const inaugrationValue = ['Inaugration',parseInt((json.inaugrationCount/json.totalRecordCount) * 100)]
+      const inaugrationValue = ['Groundwork',parseInt((json.inaugrationCount/json.totalRecordCount) * 100)]
       const completionValue = ['Completion',parseInt((json.completionCount/json.totalRecordCount) * 100)]
 
       setGaugeValue([...gaugeInitialValue,inaugrationValue,completionValue])
@@ -350,9 +408,14 @@ export default function Dashboard() {
   const checkIfTalukaAssignedToUser = async()=>{
     const userData = await localStorage.getItem('userData');
     if(userData && userData.taluka){
-      return true;
+      setIsTalukaAssignedToUser(true);
     }
-    return false;
+    setIsTalukaAssignedToUser(false);
+  }
+
+  const logOut = () =>{
+    localStorage.removeItem('userData');
+    setIsLoggedIn(false);
   }
   
   
@@ -370,8 +433,8 @@ export default function Dashboard() {
             />
           </div>
           <div className="col-10">
-            <h2 style={{color:'#1ca1e4',fontStyle:'oblique'}}>जल संचय जन भागीदारी</h2>
-            <h5>पेयजल एवं स्वच्छता विभाग, जल शक्ति मंत्रालय</h5>
+            <h2 style={{color:'#1ca1e4',fontStyle:'oblique'}}><b>जल संचय जन भागीदारी</b></h2>
+            <h5>जल शक्ति मंत्रालय</h5>
             <h5>सूरत, गुजरात राज्य</h5>
 
           </div>
@@ -380,12 +443,6 @@ export default function Dashboard() {
               src="./logo.jpeg"
               style={{ height: "90px", width: "100%", objectFit: "contain",marginTop:10 }}
             />
-            {/* {
-              !isLoggedIn ?
-              <button className="btn btn-primary mt-3" onClick={()=>navigate('/login')}>Click Here to Login</button>
-              :
-              null
-            } */}
           </div>
         </div>
        </div>
@@ -553,33 +610,29 @@ export default function Dashboard() {
                                   className="card-img-top"
                                   src={mapMarkerList[activeMarker].Inauguration_PHOTO1}
                                   alt="Card image cap"
+                                  style={{width:'100%',height:150}}
                                 />
                               ) : null}
                               <div className="card-body" style={{ textAlign: "left" }}>
                                 <h5 className="card-title" style={{ fontSize: 15 }}>
-                                  {mapMarkerList[activeMarker].District}
+                                  <b>District :</b> {mapMarkerList[activeMarker].District}, <b>Taluka :</b> {mapMarkerList[activeMarker].Taluka}
                                 </h5>
-                                <br />
                                 <span className="card-text" style={{ fontSize: 12 }}>
-                                  {mapMarkerList[activeMarker].Taluka}
+                                  <b>Village :</b> {mapMarkerList[activeMarker].Village}
                                 </span>
                                 <br />
                                 <span className="card-text" style={{ fontSize: 12 }}>
-                                  {mapMarkerList[activeMarker].Village}
-                                </span>
-                                <br />
-                                <span className="card-text" style={{ fontSize: 12 }}>
-                                  {mapMarkerList[activeMarker].Location}
+                                  <b>Work Location :</b> {mapMarkerList[activeMarker].Location}
                                 </span>
                                 <br />
                                 {mapMarkerList[activeMarker].Inauguration_DATE && (
                                   <span className="card-text mt-2" style={{ fontSize: 12 }}>
-                                    GroundWork Date: {mapMarkerList[activeMarker].Inauguration_DATE}
+                                    <b>GroundWork Date:</b> {mapMarkerList[activeMarker].Inauguration_DATE.split('T')[0]}
                                   </span>
-                                )}
+                                )}<br/>
                                 {mapMarkerList[activeMarker].COMPLETED_DATE && (
                                   <span className="card-text" style={{ fontSize: 12 }}>
-                                    Completion Date: {mapMarkerList[activeMarker].COMPLETED_DATE}
+                                   <b>Completion Date:</b>{mapMarkerList[activeMarker].COMPLETED_DATE.split('T')[0]}
                                   </span>
                                 )}
                               </div>
@@ -683,7 +736,14 @@ export default function Dashboard() {
                data={pieValue}
                width={"100%"}
                height={"200px"}
-               chartEvents={chartEvents}
+               options={{
+                pieSliceText: 'value', // Display the values
+                chartArea: {
+                  width: '90%',  // Increase the pie chart area width
+                  height: '90%'  // Increase the pie chart area height
+                }
+                // You can also use 'percentage' to display percentages
+              }}
              />
            </div>
          </div>
@@ -744,9 +804,9 @@ export default function Dashboard() {
                       ))}
                     </select>
                   </div>
-                  
-                  {/* {
-                    !checkIfTalukaAssignedToUser() ?
+                  {
+                    
+                    !isTalukaAssignedToUser ?
                     <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                       <select
                         value={filters.TALUKA}
@@ -764,7 +824,7 @@ export default function Dashboard() {
                     </div>
                     :
                     null
-                  } */}
+                  }
                 
 
                   <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
@@ -785,13 +845,16 @@ export default function Dashboard() {
 
                   <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-xs-6 mb-4">
                     {isLoggedIn ? (
-                      <button
-                        type="button"
-                        onClick={() => navigateToRecordCreation()}
-                        className="btn btn-primary w-100"
-                      >
-                        Create New Record
-                      </button>
+                      <div style={{display:'flex',justifyContent:'space-around'}}>
+                        <button
+                          type="button"
+                          onClick={() => navigateToRecordCreation()}
+                          className="btn btn-primary w-75"
+                          >
+                          Create New Record
+                        </button>
+                        <CiLogin style={{marginTop:5,cursor:'pointer'}} onClick={()=>logOut()} size={30}/>
+                      </div>
                     ) : (
                       <button
                         type="button"
@@ -897,6 +960,8 @@ export default function Dashboard() {
           </Paper>
         
          <div className="col-12">
+          {
+            stackedBarChart[0][1] ? 
            <div class="card" style={{marginTop:10}}>
            <Chart
                chartType="BarChart"
@@ -917,7 +982,7 @@ export default function Dashboard() {
                  },
                }}
              />
-           </div>
+           </div>:null}
 
            {
           showModal ? 
@@ -927,6 +992,16 @@ export default function Dashboard() {
             :
             null
           }
+
+          {
+            showImagePopUp ?
+            <div className="col-12" style={{display:'flex',justifyContent:'center'}}>
+                <ImageModal selectedImage={imagePopUpURL} onHandleClose={triggerImageModalVisibility}/>
+            </div>
+            :
+            null
+          }
+          
          </div>
        </div>
      </div>
