@@ -406,11 +406,13 @@ export default function Dashboard() {
   };
 
   const checkIfTalukaAssignedToUser = async()=>{
-    const userData = await localStorage.getItem('userData');
-    if(userData && userData.taluka){
-      setIsTalukaAssignedToUser(true);
+    let userData = await localStorage.getItem('userData');
+    if(userData){
+      userData = JSON.parse(userData);
+      userData.taluka ? setIsTalukaAssignedToUser(true) : setIsTalukaAssignedToUser(false);
+      return;
     }
-    setIsTalukaAssignedToUser(false);
+    setIsTalukaAssignedToUser(false)
   }
 
   const logOut = () =>{
@@ -789,23 +791,29 @@ export default function Dashboard() {
          {/* Insert Table Here */}
          <div className="col-12 mt-4 mb-2 d-none d-sm-block">
             <div className="row">
-                  <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
-                    <select
-                      value={filters.DISTRICT}
-                      onChange={(e) => {
-                        handleTalukaChange(e);
-                      }}
-                    >
-                      <option value="null">Select District</option>
-                      {picklistValues.district.map((district, index) => (
-                        <option key={index} value={district}>
-                          {district}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                   {
-                    
+                    !isTalukaAssignedToUser ? 
+                      <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
+                        <select
+                          value={filters.DISTRICT}
+                          onChange={(e) => {
+                            handleTalukaChange(e);
+                          }}
+                        >
+                          <option value="null">Select District</option>
+                          {picklistValues.district.map((district, index) => (
+                            <option key={index} value={district}>
+                              {district}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    : 
+                    null
+                  }
+                
+
+                  {
                     !isTalukaAssignedToUser ?
                     <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                       <select
