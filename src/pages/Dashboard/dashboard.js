@@ -7,7 +7,7 @@ import { FaRoad } from "react-icons/fa6";
 import { RiRoadMapFill } from "react-icons/ri";
 import { TbTargetArrow } from "react-icons/tb";
 import { GiInauguration } from "react-icons/gi";
-import { FaRegThumbsUp } from "react-icons/fa";
+import { FaRegThumbsUp,FaFileCsv,FaFilePdf } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { CiLogin } from "react-icons/ci";
 import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [showImagePopUp,setImagePopUp] = useState(false);
   const [imagePopUpURL,setImagePopUpURL] = useState(null);
   const [isTalukaAssignedToUser,setIsTalukaAssignedToUser] = useState(false);
+  const [sliderImages,setSliderImages] = useState([]);
 
   const itemsPerPage = 10;
 
@@ -193,10 +194,29 @@ export default function Dashboard() {
     setIsLoggedIn(false)
   }
 
+  const getSliderImages=async()=>{
+    const response = await fetch(
+      `https://rainwaterharvesting-backend.onrender.com/getSliderImages`,
+      {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      })
+
+      const jsonResponse = await response.json();
+      console.log(208,jsonResponse);
+      if(jsonResponse.code === 200){
+        let filesRetrieved = jsonResponse.data.filter((files) => files.name.includes('.png') || files.name.includes('.jpg'));
+        setSliderImages([...filesRetrieved]);
+      }
+  }
+
   useEffect(()=>{
     console.log(142);
     fetchData();
     checkIfTalukaAssignedToUser();
+    getSliderImages();
   },[])
 
   useEffect(() => {
@@ -651,78 +671,20 @@ export default function Dashboard() {
             </div>
             <div className="col-xl-6 col-l-6 col-m-6 col-xs-12">
             <Carousel>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./1.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="First slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./2.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Second slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./3.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./4.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./5.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./6.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./7.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./8.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
-              <Carousel.Item>
-                <img
-                  className="d-block w-100"
-                  src="./10.jpg"
-                  style={{height:500,width:'100%'}}
-                  alt="Third slide"
-                />
-              </Carousel.Item>
+              {
+                sliderImages.map((slider)=>{
+                    return(
+                      <Carousel.Item>
+                        <img
+                          className="d-block w-100"
+                          src={`https://jalshakti.co.in/Sliders/${slider.name}`}
+                          style={{height:500,width:'100%',objectFit:'cover'}}
+                          alt="First slide"
+                        />
+                      </Carousel.Item>
+                    )
+                })
+              }
             </Carousel>
             </div>
           </div>
@@ -790,6 +752,20 @@ export default function Dashboard() {
          
          {/* Insert Table Here */}
          <div className="col-12 mt-4 mb-2 d-none d-sm-block">
+            {/* <div className="row mb-3">
+                <div className="col-3">
+                      <input id="Search" name="Search" type="text" value={""} onChange={""}/>
+                </div>
+                <div className="col-2">
+                  <button type="button" onClick={() => navigate('/login')} className="btn btn-primary w-100">Search</button>
+                </div>
+                <div className="col-2">
+                  <div className="d-flex">
+                    <FaFileCsv className="mt-1" size={30}/>
+                    <FaFilePdf className="mt-1" size={30}/>
+                  </div>
+                </div>
+            </div> */}
             <div className="row">
                   {
                     !isTalukaAssignedToUser ? 
@@ -873,7 +849,7 @@ export default function Dashboard() {
                       </button>
                     )}
                   </div>
-
+                
             </div>
          </div>
 
