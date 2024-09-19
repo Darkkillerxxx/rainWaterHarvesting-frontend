@@ -17,6 +17,8 @@ import Paper from '@mui/material/Paper';
 import { Button } from '@mui/material';
 import Modal from '../../components/Modal/Modal.js'
 import ImageModal from '../../components/Modal/ImageModal.js'
+import { CSVLink, CSVDownload } from "react-csv";
+
 
 //https://rainwaterharvesting-backend.onrender.com
 //http://103.116.176.242:3000
@@ -232,26 +234,28 @@ export default function Dashboard() {
   }, [filters]);
 
   useEffect(()=>{
-    let filteredTableData ;
+    let filteredTableData = [];
+
+    if(tableData.length > 0){
+      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText) || data.location.includes(searchText));
+    }
+
     if(showOnlyGroundWork){
-      if(tableData.length > 0){
-        filteredTableData = tableData.filter((data)=> data.inaugurationDate);
-        
-      }
+      filteredTableData = filteredTableData.filter((data)=> data.inaugurationDate);
     }
 
     if(showOnlyCompleted){
-      if(tableData.length > 0){
-        filteredTableData = tableData.filter((data)=> data.completionDate);
-      }
+      filteredTableData = filteredTableData.filter((data)=> data.completionDate);
     }
     console.log(filteredTableData);
-    if(filteredTableData && filteredTableData.length > 0){
-      setTableDataToShow([...filteredTableData]);
-      return
-    }
-    setTableDataToShow([...tableData]);
-  },[showOnlyGroundWork,showOnlyCompleted])
+
+    
+
+    
+  
+    setTableDataToShow([...filteredTableData]);
+     
+  },[showOnlyGroundWork,showOnlyCompleted,searchText])
 
   const triggerImageModalVisibility = () =>{
     setImagePopUp(!showImagePopUp)
@@ -467,36 +471,6 @@ export default function Dashboard() {
     setIsLoggedIn(false);
   }
 
-  const onSearchClick = () =>{
-    let filteredTableData ;
-    if(tableData.length > 0){
-      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText) || data.location.includes(searchText));
-      setTableDataToShow([...filteredTableData]);
-    }
-  }
-
-  const onCheckBoxClicked = (e,type) =>{
-    console.log(e.target.checked)
-    let filteredTableData ;
-    if(type && e.target.checked){
-      if(tableData.length > 0){
-        filteredTableData = tableData.filter((data)=> data.Inauguration_DATE);
-        setTableDataToShow([...filteredTableData]);
-      }
-    }
-
-    if(!type && e.target.value){
-      if(tableData.length > 0){
-        filteredTableData = tableData.filter((data)=> data.COMPLETED_DATE);
-        setTableDataToShow([...filteredTableData]);
-      }
-    }
-    if(filteredTableData && filteredTableData.length > 0){
-      setTableDataToShow([...filteredTableData]);
-      return
-    }
-    setTableDataToShow([...tableData]);
-  }
   
   return (
     <>
@@ -815,9 +789,7 @@ export default function Dashboard() {
                 <div className="col-4">
                       <input id="Search" placeholder="Search Records" name="Search" type="text" value={searchText} onChange={(e)=> setSearchText(e.target.value)}/>
                 </div>
-                <div className="col-2">
-                  <button type="button" onClick={() => onSearchClick() } className="btn btn-primary w-100">Search</button>
-                </div>
+               
                 <div className="col-6">
                   <div className="row mt-2">
                     <div className="col-6">
@@ -838,12 +810,11 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                {/* <div className="col-1">
-                  <div className="d-flex">
-                    <FaFileCsv className="mt-1" size={30}/>
-                    <FaFilePdf className="mt-1" size={30}/>
-                  </div>
-                </div> */}
+                <div className="col-2">
+                    <div style={{marginTop:10}}>
+                      <CSVLink style={{marginTop:20}} data={tableDataToShow}>Download CSV</CSVLink>
+                    </div>
+                </div>
             </div>
             <div className="row">
                   {
