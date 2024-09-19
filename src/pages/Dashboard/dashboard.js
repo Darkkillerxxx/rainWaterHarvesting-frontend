@@ -39,7 +39,7 @@ export default function Dashboard() {
   const [tableDataToShow,setTableDataToShow] = useState([]);
   const [tableCount,setTableCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchText,setSearchText] = useState(null);
+  const [searchText,setSearchText] = useState("");
   const [filters, setFilters] = useState({
     DISTRICT: 'Surat',
     TALUKA: null,
