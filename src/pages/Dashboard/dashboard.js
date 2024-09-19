@@ -34,8 +34,10 @@ export default function Dashboard() {
   const [mapMarkerList,setmapMarkerList] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
   const [tableData,setTableData] = useState([]);
+  const [tableDataToShow,setTableDataToShow] = useState([]);
   const [tableCount,setTableCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchText,setSearchText] = useState(null);
   const [filters, setFilters] = useState({
     DISTRICT: 'Surat',
     TALUKA: null,
@@ -175,6 +177,7 @@ export default function Dashboard() {
     console.log(rows);
     
     setTableData(rows);
+    setTableDataToShow(rows);
     setTableCount(jsonResponse.data.totalCount);
     triggerIsLoggedIn();
   };
@@ -439,6 +442,16 @@ export default function Dashboard() {
     localStorage.removeItem('userData');
     setIsLoggedIn(false);
   }
+
+  const onSearchClick = () =>{
+    let filteredTableData ;
+    if(tableData.length > 0){
+      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText));
+      setTableDataToShow([...filteredTableData]);
+    }
+  }
+
+  
   
   
   return (
@@ -598,35 +611,14 @@ export default function Dashboard() {
                                 top: "50%",
                                 left: "50%",
                                 transform: "translate(-50%, -50%)", // Center the InfoWindow
-                                width: "300px",
+                                width: "250px",
                                 backgroundColor: "white",
                                 boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
                                 borderRadius: "5px",
-                                padding: "15px",
+                                padding: "5px",
                                 zIndex: 1000,
                               }}
                             >
-                              {/* Close button */}
-                              <button
-                                onClick={() => setActiveMarker(null)} // Reset activeMarker to close the card
-                                style={{
-                                  position: "absolute",
-                                  top: "10px",
-                                  right: "10px",
-                                  background: "none",
-                                  border: "none",
-                                  fontSize: "16px",
-                                  fontWeight: "bold",
-                                  cursor: "pointer",
-                                  width:"30px",
-                                  color:'black',
-                                  alignSelf:'end',
-                                  marginTop:'10px'
-                                }}
-                              >
-                                X
-                              </button>
-
                               {mapMarkerList[activeMarker].Inauguration_PHOTO1 ? (
                                 <img
                                   className="card-img-top"
@@ -636,28 +628,47 @@ export default function Dashboard() {
                                 />
                               ) : null}
                               <div className="card-body" style={{ textAlign: "left" }}>
-                                <h5 className="card-title" style={{ fontSize: 15 }}>
-                                  <b>District :</b> {mapMarkerList[activeMarker].District}, <b>Taluka :</b> {mapMarkerList[activeMarker].Taluka}
-                                </h5>
-                                <span className="card-text" style={{ fontSize: 12 }}>
-                                  <b>Village :</b> {mapMarkerList[activeMarker].Village}
+                                <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
+                                  District :<b> {mapMarkerList[activeMarker].District}</b>, Taluka :<b> {mapMarkerList[activeMarker].Taluka}</b>
                                 </span>
-                                <br />
-                                <span className="card-text" style={{ fontSize: 12 }}>
-                                  <b>Work Location :</b> {mapMarkerList[activeMarker].Location}
+                                <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
+                                  Village :<b> {mapMarkerList[activeMarker].Village}</b>
                                 </span>
-                                <br />
+                                <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
+                                  Work Location :<b> {mapMarkerList[activeMarker].Location}</b>
+                                </span>
                                 {mapMarkerList[activeMarker].Inauguration_DATE && (
-                                  <span className="card-text mt-2" style={{ fontSize: 12 }}>
-                                    <b>GroundWork Date:</b> {mapMarkerList[activeMarker].Inauguration_DATE.split('T')[0]}
+                                  <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
+                                    GroundWork Date:   <b> 
+                                      {new Date(mapMarkerList[activeMarker].Inauguration_DATE).toLocaleDateString('en-GB', {
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: 'numeric'
+                                      })}
+                                    </b>
                                   </span>
-                                )}<br/>
+                                )}
                                 {mapMarkerList[activeMarker].COMPLETED_DATE && (
-                                  <span className="card-text" style={{ fontSize: 12 }}>
-                                   <b>Completion Date:</b>{mapMarkerList[activeMarker].COMPLETED_DATE.split('T')[0]}
+                                  <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
+                                    Completion Date:   <b> 
+                                      {new Date(mapMarkerList[activeMarker].COMPLETED_DATE).toLocaleDateString('en-GB', {
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: 'numeric'
+                                      })}
+                                    </b>
                                   </span>
                                 )}
                               </div>
+                                {/* Close button */}
+                                <button className="btn btn-primary" onClick={() => setActiveMarker(null)} // Reset activeMarker to close the card
+                                style={{
+                                  width:'100%',
+                                  height:40
+                                }}
+                              >
+                                Close
+                              </button>
                             </div>
                           ) : null}
                         </>
@@ -729,11 +740,12 @@ export default function Dashboard() {
                   options={{
                     width: 500,
                     height: 150,
-                    redFrom: 90,
-                    redTo: 100,
-                    yellowFrom: 75,
-                    yellowTo: 90,
+                    blueFrom: 90,
+                    blueTo: 100,
+                    greenFrom: 75,
+                    greenTo: 100,
                     minorTicks: 5,
+                    
                   }}
                 />
                 <style>
@@ -752,20 +764,40 @@ export default function Dashboard() {
          
          {/* Insert Table Here */}
          <div className="col-12 mt-4 mb-2 d-none d-sm-block">
-            {/* <div className="row mb-3">
-                <div className="col-3">
-                      <input id="Search" name="Search" type="text" value={""} onChange={""}/>
+            <div className="row mb-3">
+                <div className="col-4">
+                      <input id="Search" placeholder="Search Records" name="Search" type="text" value={searchText} onChange={(e)=> setSearchText(e.target.value)}/>
                 </div>
                 <div className="col-2">
-                  <button type="button" onClick={() => navigate('/login')} className="btn btn-primary w-100">Search</button>
+                  <button type="button" onClick={() => onSearchClick() } className="btn btn-primary w-100">Search</button>
                 </div>
-                <div className="col-2">
+                <div className="col-6">
+                  <div className="row mt-2">
+                    <div className="col-6">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault"/>
+                        <label class="form-check-label" for="flexCheckDefault">
+                          Groundwork Completed Records
+                        </label>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div class="form-check">
+                        <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault"/>
+                        <label class="form-check-label" for="flexCheckDefault">
+                          Completed Records
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* <div className="col-1">
                   <div className="d-flex">
                     <FaFileCsv className="mt-1" size={30}/>
                     <FaFilePdf className="mt-1" size={30}/>
                   </div>
-                </div>
-            </div> */}
+                </div> */}
+            </div>
             <div className="row">
                   {
                     !isTalukaAssignedToUser ? 
@@ -933,7 +965,7 @@ export default function Dashboard() {
          
          <Paper sx={{ height: 400, width: '100%' }}>
             <DataGrid
-              rows={tableData}
+              rows={tableDataToShow}
               columns={columns}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
