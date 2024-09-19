@@ -51,6 +51,8 @@ export default function Dashboard() {
   const [username,setUsername] = useState(null);
   const [selectedData,setSelectedData] = useState(null)
   const [showModal,setShowModal] = useState(false);
+  const [showOnlyGroundWork,setShowOnlyGroundwork] = useState(false);
+  const [showOnlyCompleted,setShowOnlyCompleted] = useState(false);
 
   const [isLoggedIn,setIsLoggedIn] = useState(true)
   const [activeMarker, setActiveMarker] = useState(null);
@@ -228,6 +230,28 @@ export default function Dashboard() {
       fetchData();
     }
   }, [filters]);
+
+  useEffect(()=>{
+    let filteredTableData ;
+    if(showOnlyGroundWork){
+      if(tableData.length > 0){
+        filteredTableData = tableData.filter((data)=> data.inaugurationDate);
+        
+      }
+    }
+
+    if(showOnlyCompleted){
+      if(tableData.length > 0){
+        filteredTableData = tableData.filter((data)=> data.completionDate);
+      }
+    }
+    console.log(filteredTableData);
+    if(filteredTableData && filteredTableData.length > 0){
+      setTableDataToShow([...filteredTableData]);
+      return
+    }
+    setTableDataToShow([...tableData]);
+  },[showOnlyGroundWork,showOnlyCompleted])
 
   const triggerImageModalVisibility = () =>{
     setImagePopUp(!showImagePopUp)
@@ -446,13 +470,33 @@ export default function Dashboard() {
   const onSearchClick = () =>{
     let filteredTableData ;
     if(tableData.length > 0){
-      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText));
+      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText) || data.location.includes(searchText));
       setTableDataToShow([...filteredTableData]);
     }
   }
 
-  
-  
+  const onCheckBoxClicked = (e,type) =>{
+    console.log(e.target.checked)
+    let filteredTableData ;
+    if(type && e.target.checked){
+      if(tableData.length > 0){
+        filteredTableData = tableData.filter((data)=> data.Inauguration_DATE);
+        setTableDataToShow([...filteredTableData]);
+      }
+    }
+
+    if(!type && e.target.value){
+      if(tableData.length > 0){
+        filteredTableData = tableData.filter((data)=> data.COMPLETED_DATE);
+        setTableDataToShow([...filteredTableData]);
+      }
+    }
+    if(filteredTableData && filteredTableData.length > 0){
+      setTableDataToShow([...filteredTableData]);
+      return
+    }
+    setTableDataToShow([...tableData]);
+  }
   
   return (
     <>
@@ -600,6 +644,9 @@ export default function Dashboard() {
                           }`}
                           position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.longitude) }}
                           onClick={() => handleMarkerClick(index)}
+                          icon={{
+                            url: `${marker.COMPLETED_DATE ? './placeholderBlue.png': './placeholderRed.png'}`  // Replace with your icon URL                          }}
+                          }}
                         />
 
                         <>
@@ -622,7 +669,7 @@ export default function Dashboard() {
                               {mapMarkerList[activeMarker].Inauguration_PHOTO1 ? (
                                 <img
                                   className="card-img-top"
-                                  src={mapMarkerList[activeMarker].Inauguration_PHOTO1}
+                                  src={mapMarkerList[activeMarker].COMPLETED_DATE ? mapMarkerList[activeMarker].COMPLETED_PHOTO1: mapMarkerList[activeMarker].Inauguration_PHOTO1}
                                   alt="Card image cap"
                                   style={{width:'100%',height:150}}
                                 />
@@ -775,7 +822,7 @@ export default function Dashboard() {
                   <div className="row mt-2">
                     <div className="col-6">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault"/>
+                        <input class="form-check-input" type="checkbox" onChange={(e)=> setShowOnlyGroundwork(e.target.checked)} value="" id="flexCheckDefault"/>
                         <label class="form-check-label" for="flexCheckDefault">
                           Groundwork Completed Records
                         </label>
@@ -783,7 +830,7 @@ export default function Dashboard() {
                     </div>
                     <div className="col-6">
                       <div class="form-check">
-                        <input class="form-check-input mt-1" type="checkbox" value="" id="flexCheckDefault"/>
+                        <input class="form-check-input mt-1" type="checkbox" value="" onChange={(e)=>setShowOnlyCompleted(e.target.checked)} id="flexCheckDefault"/>
                         <label class="form-check-label" for="flexCheckDefault">
                           Completed Records
                         </label>

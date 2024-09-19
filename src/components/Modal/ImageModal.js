@@ -8,10 +8,10 @@ const ImageModal = ({selectedImage, onHandleClose }) => {
   
 
   return(
-      <Modal show={show} size="lg" centered>
+      <Modal show={show} size="md" centered>
         <Modal.Body>
           {selectedImage && (
-            <Image src={selectedImage} alt="Selected Preview" fluid />
+            <Image style={{objectFit:'cover'}} src={selectedImage} alt="Selected Preview" fluid />
           )}
         </Modal.Body>
         <Modal.Footer>
