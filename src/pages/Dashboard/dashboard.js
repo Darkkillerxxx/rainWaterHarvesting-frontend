@@ -29,9 +29,9 @@ export default function Dashboard() {
 
   const [districts,setDistricts] = useState([]);
   const [selectedCity, setSelectedCity] = useState("Surat");
-  const [dashboardData,setDashboardData] = useState(null)
-  const [gaugeValue,setGaugeValue] = useState([])
-  const [pieValue,setPieValue] = useState([])
+  const [dashboardData,setDashboardData] = useState(null);
+  const [gaugeValue,setGaugeValue] = useState([]);
+  const [pieValue,setPieValue] = useState([]);
   const [stackedBarChart,setStackedBarChart] = useState([]);
   const [mapMarkerList,setmapMarkerList] = useState([]);
   const [selectedValue, setSelectedValue] = useState(null);
@@ -92,14 +92,29 @@ export default function Dashboard() {
     { field: 'taluka', headerName: 'Taluka', width: 130, editable: false },
     { field: 'village', headerName: 'Village', width: 130, editable: false },
     { field: 'location', headerName: 'Location', width: 130, editable: false },
-    { field: 'inaugurationDate', headerName: 'GroundWork Date', type: 'date', width: 150, editable: false },
-    { field: 'completionDate', headerName: 'Completion Date', type: 'date', width: 150, editable: false },
+    { field: 'work', headerName: 'Work Details', width: 130, editable: false },
+    { field: 'isGroundworkPhotoApproved', headerName: 'Ground Work Photo Approved', width: 130, editable: true,type:'boolean' },
+    { field: 'isCompletedPhotoApproved', headerName: 'Completed Photo Approved', width: 130, editable: true,type:'boolean' },
+    { field: 'inaugurationDate', 
+      headerName: 'GroundWork Date',
+      type: 'date',
+      width: 150, 
+      editable: false,
+      valueFormatter: (params) => params ? params.toLocaleDateString('en-GB') : '', // Format for display
+    },
+    { field: 'completionDate', 
+      headerName: 'Completion Date', 
+      type: 'date', 
+      width: 150, 
+      editable: false, 
+      valueFormatter: (params) => params ? params.toLocaleDateString('en-GB') : '', // Format for display
+    },
     {
       field: 'inaugurationPhoto',
       headerName: 'GroundWork Photo',
       width: 150,
       renderCell: (params) => (
-        params.row.inaugurationPhoto ? (
+        params.row.inaugurationPhoto && params.row.isGroundworkPhotoApproved ? (
           <Button
             variant="contained"
             color="secondary"
@@ -121,7 +136,7 @@ export default function Dashboard() {
       headerName: 'Completion Photo',
       width: 150,
       renderCell: (params) => (
-        params.row.completionPhoto ? (
+        params.row.completionPhoto && params.row.isCompletedPhotoApproved ? (
           <Button
             variant="contained"
             color="secondary"
@@ -166,6 +181,7 @@ export default function Dashboard() {
     );
 
     const jsonResponse = await response.json();
+    console.log(182,jsonResponse);
     const rows = jsonResponse.data.data.map((data, index) => ({
       id: data.ID,  // Use the ID field
       district: data.DISTRICT,
@@ -175,7 +191,11 @@ export default function Dashboard() {
       inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,
       inaugurationPhoto: data.Inauguration_PHOTO1 ? data.Inauguration_PHOTO1 : null,
       completionDate: data.COMPLETED_DATE ? new Date(data.COMPLETED_DATE) : null,
-      completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,  // Parse the date
+      work:data.WORK_NAME ? data.WORK_NAME : null, 
+      completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,
+      isGroundworkPhotoApproved:data.IS_GROUNDWORK_PHOTO_APPROVED ? true : false,
+      isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false
+        // Parse the date
     }));
 
     console.log(rows);
@@ -340,7 +360,7 @@ export default function Dashboard() {
       await localStorage.setItem('Talukas',talukaValues.toString());
 
       const villageValues = [...new Set(data.data.map(item => item.VILLAGE))];
-  
+
       setPicklistValues({
         district: districtValues,
         taluka: talukaValues,

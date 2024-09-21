@@ -2,6 +2,13 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "./Form.css";
+import {DotLoader, BeatLoader} from "react-spinners";
+
+const override = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
+};
 
 const Form = () => {
   const location = useLocation();
@@ -19,6 +26,8 @@ const Form = () => {
   const [Latitude, setLatitude] = useState(23.0225);
   const [Longitude, setLongitude] = useState(72.5714);
   const [photo, setPhoto] = useState(null);
+  const [WORK_NAME,setWorkName] = useState(null);
+  const [isLoading,setIsLoading] = useState(false);
 
   useEffect(() => {
     if (navigator.geolocation !== null) {
@@ -68,6 +77,9 @@ const Form = () => {
       case "Inauguration_DATE":
         setDate(value);
         break;
+      case "WorkName":
+        setWorkName(value);
+        break;
       default:
         break;
     }
@@ -84,23 +96,11 @@ const Form = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
+    setIsLoading(true);
+   try{
     e.preventDefault();
-    // const formData = new FormData();
-    // formData.append("DISTRICT", DISTRICT);
-    // formData.append("TALUKA", TALUKA);
-    // formData.append("VILLAGE", VILLAGE);
-    // // formData.append("mobile", mobile);
-    // formData.append("LOCATION", LOCATION);
-    // formData.append("Inauguration_DATE", Inauguration_DATE);
-    // formData.append("Latitude", Latitude);
-    // formData.append("Longitude", Longitude);
-    // // formData.append("photo", photo);
-
-    // // for (let [key, value] of formData.entries()) {
-    // //   console.log(`${key}: ${value}`);
-    // // }
-
+  
     const data = {
       DISTRICT,
       TALUKA,
@@ -109,23 +109,36 @@ const Form = () => {
       Inauguration_DATE,
       Latitude,
       Longitude,
+      WORK_NAME,
       Inauguration_PHOTO1: photo, // Note: You can't send files directly in JSON
     };
 
     console.log(data);
 
-    axios
-      .post(
-        "http://localhost:3000/createRecords",
-        data,
-      )
-      .then((res) => {
-        alert("Successfully added to the table");
-        console.log("Successfully added to the table\nRes:", res);
-      })
-      .catch((e) => {
-        console.log("Error:", e);
-      });
+    const res = await axios.post("https://rainwaterharvesting-backend.onrender.com/createRecords",data)
+    if(res){
+      alert("Successfully added to the table");
+      console.log("Successfully added to the table\nRes:", res);
+    }
+
+    setDistrict("Surat");
+    setTaluka("BARDOLI");
+    setVillage("");
+    setMobile("");
+    setAddress("");
+    setDate("");
+    setLatitude(23.0225);
+    setLongitude(72.5714);
+    setPhoto(null);
+    setWorkName(null);
+    setInaugurationPhoto(null);
+   }
+   catch(error){
+    alert("Something went wrong :-"+error);
+   }
+   finally{
+    setIsLoading(false);
+   }
   };
 
   return (
@@ -190,12 +203,23 @@ const Form = () => {
             </div>
           </div>
           <div className="form-group">
-            <label htmlFor="LOCATION">Address *</label>
+            <label htmlFor="LOCATION">Location *</label>
             <input
               id="LOCATION"
               name="LOCATION"
               type="text"
               value={LOCATION}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="WorkName">Work Details *</label>
+            <input
+              id="WorkDetails"
+              name="WorkName"
+              type="text"
+              value={WORK_NAME}
               onChange={handleChange}
               required
             />
@@ -229,7 +253,23 @@ const Form = () => {
               />
             )}
           </div> */}
-          <button type="submit">Submit</button>
+          <button type="submit">
+          {
+            isLoading ? 
+              <BeatLoader 
+                  color={"#ffffff"}
+                  loading={isLoading}
+                  cssOverride={override}
+                  size={15}
+                  aria-label="Loading Spinner"
+                  data-testid="loader"
+                />
+            :
+            'Submit'
+          }
+          </button>
+       
+         
         </form>
       </div>
     </div>

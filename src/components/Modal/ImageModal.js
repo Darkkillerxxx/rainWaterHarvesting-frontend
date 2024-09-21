@@ -8,18 +8,33 @@ const ImageModal = ({selectedImage, onHandleClose }) => {
   
 
   return(
-      <Modal show={show} size="md" centered>
-        <Modal.Body>
+    <Modal show={show} size="md" centered>
+      <Modal.Body>
+        <div className="col-12" style={{ height: 500, position: 'relative' }}>
           {selectedImage && (
-            <Image style={{objectFit:'cover'}} src={selectedImage} alt="Selected Preview" fluid />
+            <Image
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                position: 'absolute', // Ensures it takes up the full space
+                top: 0,
+                left: 0
+              }}
+              src={selectedImage}
+              alt="Selected Preview"
+              fluid
+            />
           )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={()=>onHandleClose()}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => onHandleClose()}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  
     )  
   }
 

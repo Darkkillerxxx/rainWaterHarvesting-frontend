@@ -25,6 +25,7 @@ const formatDate = (date) => {
       inaugurationPhoto: null,
       inaugurationPhotoBase64: '', // For storing the base64 string
       completionDate: '',
+      workName:'',
       completionPhoto: null,
       completionPhotoBase64: '', // For storing the base64 string
     });
@@ -77,6 +78,7 @@ const formatDate = (date) => {
           inaugurationPhotoBase64: formData.inaugurationPhotoBase64, // base64 encoded image
           COMPLETED_DATE: formData.completionDate,
           completionPhotoBase64: formData.completionPhotoBase64,
+          WORK_NAME:formData.workName,
           Latitude:location.latitude,
           Longitude:location.longitude // base64 encoded image
         };
@@ -114,7 +116,7 @@ const formatDate = (date) => {
       setPicklistValues({ ...picklistOptions });
   
       // Populate formData with selectedData, format the dates properly
-      console.log(rowData);
+      console.log(227,rowData);
       setFormData({
         district: rowData.district || '',
         taluka: rowData.taluka || '',
@@ -124,6 +126,7 @@ const formatDate = (date) => {
         inaugurationPhoto: rowData.inaugurationPhoto || null,
         completionDate: formatDate(rowData.completionDate), // Format date
         completionPhoto: rowData.completionPhoto || null,
+        workName:rowData.work || null
       });
     }, [picklistOptions, rowData]);
 
@@ -211,6 +214,16 @@ const formatDate = (date) => {
                 type="date"
                 name="inaugurationDate"
                 value={formData.inaugurationDate} // Set the value to selected data
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="workName" style={{ marginBottom: 10 }}>
+              <Form.Label>Work Details</Form.Label>
+              <Form.Control
+                type="text"
+                name="workName"
+                value={formData.workName} // Set the value to selected data
                 onChange={handleChange}
               />
             </Form.Group>
