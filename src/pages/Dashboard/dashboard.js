@@ -42,8 +42,8 @@ export default function Dashboard() {
   const [searchText,setSearchText] = useState("");
   const [filters, setFilters] = useState({
     DISTRICT: 'Surat',
-    TALUKA: null,
-    VILLAGE: null,
+    TALUKA: '',
+    VILLAGE: '',
   });
   const [picklistValues, setPicklistValues] = useState({
     district: [],
@@ -93,8 +93,6 @@ export default function Dashboard() {
     { field: 'village', headerName: 'Village', width: 130, editable: false },
     { field: 'location', headerName: 'Location', width: 130, editable: false },
     { field: 'work', headerName: 'Work Details', width: 130, editable: false },
-    { field: 'isGroundworkPhotoApproved', headerName: 'Ground Work Photo Approved', width: 130, editable: true,type:'boolean' },
-    { field: 'isCompletedPhotoApproved', headerName: 'Completed Photo Approved', width: 130, editable: true,type:'boolean' },
     { field: 'inaugurationDate', 
       headerName: 'GroundWork Date',
       type: 'date',
@@ -114,7 +112,7 @@ export default function Dashboard() {
       headerName: 'GroundWork Photo',
       width: 150,
       renderCell: (params) => (
-        params.row.inaugurationPhoto && params.row.isGroundworkPhotoApproved ? (
+        params.row.inaugurationPhoto ? (
           <Button
             variant="contained"
             color="secondary"
@@ -136,7 +134,7 @@ export default function Dashboard() {
       headerName: 'Completion Photo',
       width: 150,
       renderCell: (params) => (
-        params.row.completionPhoto && params.row.isCompletedPhotoApproved ? (
+        params.row.completionPhoto ? (
           <Button
             variant="contained"
             color="secondary"
@@ -171,7 +169,7 @@ export default function Dashboard() {
     const offset = (currentPage - 1) * itemsPerPage;
     // console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
     const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
+      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
       {
         method: "GET",
         headers: {
@@ -243,14 +241,16 @@ export default function Dashboard() {
     console.log(142);
     fetchData();
     checkIfTalukaAssignedToUser();
+    fetchPicklistValues();
     getSliderImages();
   },[])
 
   useEffect(() => {
     if(filters.DISTRICT || filters.TALUKA || filters.VILLAGE){
-      console.log(148);
       fetchData();
     }
+    fetchDashboardvalues();
+    fetchMapMarkerLocations();
   }, [filters]);
 
   useEffect(()=>{
@@ -281,9 +281,11 @@ export default function Dashboard() {
     setImagePopUp(!showImagePopUp)
   }
 
+
+
   const fetchDashboardvalues = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${selectedCity}`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${filters.DISTRICT}`);
       const json = await response.json();
       console.log(json);
       setDashboardData({...json});
@@ -336,7 +338,7 @@ export default function Dashboard() {
 
   const fetchMapMarkerLocations = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${selectedCity}`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${filters.DISTRICT}`);
       const json = await response.json();
       //console.log(json);
       
@@ -359,52 +361,35 @@ export default function Dashboard() {
 
       await localStorage.setItem('Talukas',talukaValues.toString());
 
-      const villageValues = [...new Set(data.data.map(item => item.VILLAGE))];
+      if(filters.DISTRICT && filters.DISTRICT.length > 0){
+        const filteredTalukas = data.data.filter((data)=>{
+          return data.DISTRICT === filters.DISTRICT
+        });
+    
+        const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
+        console.log(370,talukaValues);
+    
+        setPicklistValues({
+          district: [...districtValues],
+          taluka: [...talukaValues],
+          village:[]
+        });
+      }
 
-      setPicklistValues({
-        district: districtValues,
-        taluka: talukaValues,
-        village: villageValues,
-      });
     }catch(error){
       throw error;
     }
   }
 
-  const chartEvents = [
-    {
-      eventName: "select",
-      callback: async({ chartWrapper }) => {
-        const chart = chartWrapper.getChart();
-        const selection = chart.getSelection();
-        if (selection.length > 0) {
-          const selectedItem = selection[0];
-          const selectedRow = selectedItem.row;
-          setSelectedValue(pieValue[selectedRow + 1][0]);
-          alert(`You clicked on ${pieValue[selectedRow + 1][0]}`);
-          await localStorage.setItem('selectedTaluka',pieValue[selectedRow + 1][0]);
-          navigate('/records', { state: { selectedTaluka: pieValue[selectedRow + 1][0] } });
-        }
-      },
-    },
-  ];
-
   const navigateToRecordCreation = async() =>{
-    const user = await localStorage.getItem('token');
+    const user = await localStorage.getItem('authToken');
+    console.log(386,user)
     if(user){
       navigate('/create');
       return
     }
     navigate('/login');
   }
-
-
-  useEffect(()=>{
-    console.log(103);
-    fetchDashboardvalues();
-    fetchMapMarkerLocations();
-    fetchPicklistValues();
-  },[selectedCity])
 
   const updateRecords = async (updatedRecord) => {
     try {
@@ -426,21 +411,49 @@ export default function Dashboard() {
     }
   };
 
+  
+
+  const handleDistrictChange = (e) => {
+    const selectedDistrict = e.target.value;
+    // setSelectedCity(selectedDistrict)
+    setFilters(prevFilters=>({
+      ...prevFilters,
+      DISTRICT:selectedDistrict,
+      TALUKA:'',
+      VILLAGE:''
+    }))
+
+    const filteredTalukas = picklistData.filter((data)=>{
+      return data.DISTRICT === selectedDistrict
+    });
+
+    const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
+    console.log(423, talukaValues);
+
+
+    setPicklistValues({...picklistValues,taluka:[...talukaValues]});
+  }
+
   const handleTalukaChange = (e) => {
     const selectedTaluka = e.target.value;
-    // console.log(118,picklistData);
+    console.log(118,selectedTaluka);
     setFilters(prevFilters => ({
       ...prevFilters,
       TALUKA: selectedTaluka,
-      VILLAGE: null,
+      VILLAGE: '',
     }));
-  
+    // console.log(438,picklistData);
     const filteredVillages = picklistData.filter((data) => {
-      return data.TALUKA === selectedTaluka;
+      
+      const normalizedDataDistrict = data.DISTRICT.trim().toLowerCase();
+      const normalizedFilterDistrict = filters.DISTRICT.trim().toLowerCase();
+      
+      return data.TALUKA === selectedTaluka && normalizedDataDistrict === normalizedFilterDistrict;
     });
     
-    const villageValues = filteredVillages.map(item => item.VILLAGE);
-    setPicklistValues({ ...picklistValues, village: villageValues });
+    const villageValues = [...new Set(filteredVillages.map(item => item.VILLAGE))];
+    
+    setPicklistValues({ ...picklistValues, village: [...villageValues] });
   };
   
 
@@ -498,26 +511,14 @@ export default function Dashboard() {
        <div className="container" style={{padding:'25px'}}>
        
        <div style={{marginBottom:50}}>
-        <div className="row"> 
-          <div className="col-1">
-            <img
-              src="./smjt.png"
-              style={{ height: "100px", width: "100%", objectFit: "contain",marginTop:10 }}
-            />
+          <div className="row"> 
+            <div className="col-12">
+              <img
+                src="./header.jpeg"
+                style={{ height: "150px", width: "100%" }}
+              />
+            </div>
           </div>
-          <div className="col-10">
-            <h2 style={{color:'#1ca1e4',fontStyle:'oblique'}}><b>जल संचय जन भागीदारी</b></h2>
-            <h5>जल शक्ति मंत्रालय</h5>
-            <h5>सूरत, गुजरात राज्य</h5>
-
-          </div>
-          <div className="col-1">
-            <img
-              src="./logo.jpeg"
-              style={{ height: "90px", width: "100%", objectFit: "contain",marginTop:10 }}
-            />
-          </div>
-        </div>
        </div>
        
        <div className="row" style={{marginTop:10}}>
@@ -843,10 +844,10 @@ export default function Dashboard() {
                         <select
                           value={filters.DISTRICT}
                           onChange={(e) => {
-                            handleTalukaChange(e);
+                            handleDistrictChange(e);
                           }}
                         >
-                          <option value="null">Select District</option>
+                          <option value={null}>Select District</option>
                           {picklistValues.district.map((district, index) => (
                             <option key={index} value={district}>
                               {district}
@@ -868,7 +869,7 @@ export default function Dashboard() {
                           handleTalukaChange(e);
                         }}
                       >
-                        <option value="null">Select Taluka</option>
+                        <option value=''>Select Taluka</option>
                         {picklistValues.taluka.map((taluka, index) => (
                           <option key={index} value={taluka}>
                             {taluka}
@@ -888,7 +889,7 @@ export default function Dashboard() {
                         setFilters({ ...filters, VILLAGE: e.target.value });
                       }}
                     >
-                      <option value="null">Select Village</option>
+                      <option value=''>Select Village</option>
                       {picklistValues.village.map((village, index) => (
                         <option key={index} value={village}>
                           {village}
