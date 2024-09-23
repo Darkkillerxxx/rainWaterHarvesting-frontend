@@ -18,6 +18,8 @@ import { Button } from '@mui/material';
 import Modal from '../../components/Modal/Modal.js'
 import ImageModal from '../../components/Modal/ImageModal.js'
 import { CSVLink, CSVDownload } from "react-csv";
+import { useSelector, useDispatch } from 'react-redux';
+import { addPicklistValues } from '../../features/picklistValuesSlice.js';
 
 
 //https://rainwaterharvesting-backend.onrender.com
@@ -25,6 +27,9 @@ import { CSVLink, CSVDownload } from "react-csv";
 
 
 export default function Dashboard() {
+  const items = useSelector((state) => state.items.picklistValues);
+  const dispatch = useDispatch();
+
   const navigate = useNavigate()
 
   const [districts,setDistricts] = useState([]);
@@ -355,6 +360,7 @@ export default function Dashboard() {
       const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
       const data = await response.json();
       setPicklistData(data.data);
+      dispatch(addPicklistValues(data.data));
 
       const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
       const talukaValues = [...new Set(data.data.map(item => item.TALUKA))];
@@ -382,7 +388,7 @@ export default function Dashboard() {
   }
 
   const navigateToRecordCreation = async() =>{
-    const user = await localStorage.getItem('authToken');
+    const user = await localStorage.getItem('authToken') || await localStorage.getItem('userData');
     console.log(386,user)
     if(user){
       navigate('/create');

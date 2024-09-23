@@ -1,25 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import {
-  MDBBtn,
-  MDBContainer,
-  MDBCard,
-  MDBCardBody,
-  MDBCardImage,
-  MDBRow,
-  MDBCol,
-  MDBIcon,
-  MDBInput
-}
-from 'mdb-react-ui-kit';
 import "./Login.css";
+import { useSelector, useDispatch } from 'react-redux';
+
 
 export const Login = () => {
+  const masterPicklistValues = useSelector((state) => state.items.picklistValues);
+
   const navigate = useNavigate() 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [taluka,setTaluka] = useState(null);
   const [district,setDistrict] = useState(null);
+  const [pickListValues,setPickListValues] = useState({
+    district:[],
+    talukas:[]
+  })
   const [talukaList,setTalukaList] = useState([]);
   const [error, setError] = useState("");
 
@@ -63,9 +59,35 @@ export const Login = () => {
     }
   }
 
+  const loadDistrictList = () =>{
+    const districtValues = [...new Set(masterPicklistValues.map(item => item.DISTRICT))];
+    console.log(districtValues,masterPicklistValues);
+    
+    setPickListValues({
+      district:[...districtValues],
+      talukas:[]
+    })
+  }
+
   useEffect(()=>{
-    loadTalukaList()
+    loadTalukaList();
+    loadDistrictList();
   },[])
+
+  const onDistrictSelect = (e) =>{
+    setDistrict(e.target.value);
+
+    const filteredTalukas = masterPicklistValues.filter((data)=>{
+      return data.DISTRICT === e.target.value
+    });
+    
+    const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
+  
+    setPickListValues((prev)=>({
+      ...prev,
+      talukas:[...talukaValues]
+    }))
+  }
 
   return (
     <section className="vh-100">
@@ -94,10 +116,14 @@ export const Login = () => {
               <select
                   value={district}
                   onChange={(e) => {
-                    setDistrict(e.target.value)
+                    onDistrictSelect(e)
                   }}>
-                    <option value="null">Select District</option>
-                    <option value="Surat">Surat</option>
+                    <option value=''>Select District</option>
+                    {pickListValues?.district?.map((value)=>{
+                      return(
+                        <option key={value} value={value}>{value}</option>
+                      )
+                    })}
                 </select>
               </div>
 
@@ -110,8 +136,8 @@ export const Login = () => {
                   onChange={(e) => {
                     setTaluka(e.target.value)
                   }}>
-                    <option value="null">Select Taluka</option>
-                      {talukaList.map((taluka, index) => (
+                    <option value=''>Select Taluka</option>
+                      {pickListValues?.talukas?.map((taluka, index) => (
                         <option key={index} value={taluka}>
                           {taluka}
                         </option>

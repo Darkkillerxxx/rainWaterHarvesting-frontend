@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "./Form.css";
 import {DotLoader, BeatLoader} from "react-spinners";
+import { useSelector, useDispatch } from 'react-redux';
+
 
 const override = {
   display: "block",
@@ -11,6 +13,8 @@ const override = {
 };
 
 const Form = () => {
+  const items = useSelector((state) => state.items.picklistValues);
+  console.log(17,items);
   const location = useLocation();
   const item = location.state?.item;
 
