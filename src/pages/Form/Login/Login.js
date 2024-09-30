@@ -39,7 +39,7 @@ export const Login = () => {
       const data = await response.json();
 
       if (data.code === 200) {
-        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:taluka}));
+        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:taluka,district:district}));
         alert("Login successful!");
         navigate('/');
         // Redirect user to another page or perform another action after login

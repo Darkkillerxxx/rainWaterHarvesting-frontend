@@ -27,13 +27,15 @@ import { addPicklistValues } from '../../features/picklistValuesSlice.js';
 
 
 export default function Dashboard() {
-  const items = useSelector((state) => state.items.picklistValues);
+  const masterPicklistValues = useSelector((state) => state.items.picklistValues);
   const dispatch = useDispatch();
 
   const navigate = useNavigate()
 
-  const [districts,setDistricts] = useState([]);
-  const [selectedCity, setSelectedCity] = useState("Surat");
+  const [district,setDistrict] = useState('');
+  const [taluka,setTaluka] = useState('');
+  const [village,setVillage] = useState('');
+
   const [dashboardData,setDashboardData] = useState(null);
   const [gaugeValue,setGaugeValue] = useState([]);
   const [pieValue,setPieValue] = useState([]);
@@ -68,6 +70,7 @@ export default function Dashboard() {
   const [imagePopUpURL,setImagePopUpURL] = useState(null);
   const [isTalukaAssignedToUser,setIsTalukaAssignedToUser] = useState(false);
   const [sliderImages,setSliderImages] = useState([]);
+  const [isDistrictAssignedToUser,setIsDistrictAssignedToUser] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -83,7 +86,7 @@ export default function Dashboard() {
           size="small"
           onClick={() => 
           {
-            console.log(params.row);
+            //console.log(params.row);
             handleEditClick(params.row)
           }
         }
@@ -99,7 +102,7 @@ export default function Dashboard() {
     { field: 'location', headerName: 'Location', width: 130, editable: false },
     { field: 'work', headerName: 'Work Details', width: 130, editable: false },
     { field: 'inaugurationDate', 
-      headerName: 'GroundWork Date',
+      headerName: 'Start Work Date',
       type: 'date',
       width: 150, 
       editable: false,
@@ -114,7 +117,7 @@ export default function Dashboard() {
     },
     {
       field: 'inaugurationPhoto',
-      headerName: 'GroundWork Photo',
+      headerName: 'Start Work Photo',
       width: 150,
       renderCell: (params) => (
         params.row.inaugurationPhoto ? (
@@ -172,41 +175,44 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
-    // console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
-    const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
-      {
-        method: "GET",
-        headers: {
-          "Cache-Control": "no-cache",
+    // //console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    if(district.length > 0){
+      const response = await fetch(
+        `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${district}&Taluka=${taluka}&Village=${village}&offSet=${offset}`,
+        {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
         },
-      },
-    );
-
-    const jsonResponse = await response.json();
-    console.log(182,jsonResponse);
-    const rows = jsonResponse.data.data.map((data, index) => ({
-      id: data.ID,  // Use the ID field
-      district: data.DISTRICT,
-      taluka: data.TALUKA,
-      village: data.VILLAGE,
-      location: data.ENG_LOCATION || data.LOCATION,  // Use either the English location or the location field
-      inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,
-      inaugurationPhoto: data.Inauguration_PHOTO1 ? data.Inauguration_PHOTO1 : null,
-      completionDate: data.COMPLETED_DATE ? new Date(data.COMPLETED_DATE) : null,
-      work:data.WORK_NAME ? data.WORK_NAME : null, 
-      completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,
-      isGroundworkPhotoApproved:data.IS_GROUNDWORK_PHOTO_APPROVED ? true : false,
-      isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false
-        // Parse the date
-    }));
-
-    console.log(rows);
-    
-    setTableData(rows);
-    setTableDataToShow(rows);
-    setTableCount(jsonResponse.data.totalCount);
-    triggerIsLoggedIn();
+      );
+  
+      const jsonResponse = await response.json();
+      //console.log(182,jsonResponse);
+      const rows = jsonResponse.data.data.map((data, index) => ({
+        id: data.ID,  // Use the ID field
+        district: data.DISTRICT,
+        taluka: data.TALUKA,
+        village: data.VILLAGE,
+        location: data.ENG_LOCATION || data.LOCATION,  // Use either the English location or the location field
+        inaugurationDate: data.Inauguration_DATE ? new Date(data.Inauguration_DATE) : null,
+        inaugurationPhoto: data.Inauguration_PHOTO1 ? data.Inauguration_PHOTO1 : null,
+        completionDate: data.COMPLETED_DATE ? new Date(data.COMPLETED_DATE) : null,
+        work:data.WORK_NAME ? data.WORK_NAME : null, 
+        completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,
+        isGroundworkPhotoApproved:data.IS_GROUNDWORK_PHOTO_APPROVED ? true : false,
+        isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false
+          // Parse the date
+      }));
+  
+      //console.log(rows);
+      
+      setTableData([...rows]);
+      setTableDataToShow([...rows]);
+      setTableCount(jsonResponse.data.totalCount);
+      triggerIsLoggedIn();
+    }
+   
   };
 
   const triggerIsLoggedIn = async() =>{
@@ -215,8 +221,8 @@ export default function Dashboard() {
       userData = JSON.parse(userData);
       setUsername(userData.user);
 
-      if(filters.TALUKA != userData.taluka){
-        setFilters({...filters,TALUKA:userData.taluka})
+      if(taluka != userData.taluka){
+        setTaluka(userData.taluka);
       }
       setIsLoggedIn(true)
       return;
@@ -235,34 +241,49 @@ export default function Dashboard() {
       })
 
       const jsonResponse = await response.json();
-      console.log(208,jsonResponse);
+      //console.log(208,jsonResponse);
       if(jsonResponse.code === 200){
-        let filesRetrieved = jsonResponse.data.filter((files) => files.name.includes('.png') || files.name.includes('.jpg'));
+        let filesRetrieved = jsonResponse.data.filter((files) => files?.name?.includes('.png') || files?.name?.includes('.jpg'));
         setSliderImages([...filesRetrieved]);
       }
   }
 
   useEffect(()=>{
-    console.log(142);
+    //console.log(142);
     fetchData();
     checkIfTalukaAssignedToUser();
     fetchPicklistValues();
     getSliderImages();
   },[])
 
-  useEffect(() => {
-    if(filters.DISTRICT || filters.TALUKA || filters.VILLAGE){
+  useEffect(()=>{
+    if(district.length === 0){
+      setDistrict('Surat')
+    }
+    if(district.length > 0){
+      fetchData();
+      fetchDashboardvalues();
+      fetchMapMarkerLocations();
+    }
+  },[district])
+
+  useEffect(()=>{
+    if(taluka && taluka.length > 0 && district.length > 0){
       fetchData();
     }
-    fetchDashboardvalues();
-    fetchMapMarkerLocations();
-  }, [filters]);
+  },[taluka])
+
+  useEffect(()=>{
+    if(village && village.length > 0 && taluka.length > 0 && district.length > 0){
+      fetchData();
+    }
+  },[village])
 
   useEffect(()=>{
     let filteredTableData = [];
 
     if(tableData.length > 0){
-      filteredTableData = tableData.filter((data)=> data.district.includes(searchText) || data.taluka.includes(searchText) || data.village.includes(searchText) || data.location.includes(searchText));
+      filteredTableData = tableData.filter((data)=> data?.district?.includes(searchText) || data?.taluka?.includes(searchText) || data?.village?.includes(searchText) || data?.location?.includes(searchText));
     }
 
     if(showOnlyGroundWork){
@@ -272,7 +293,7 @@ export default function Dashboard() {
     if(showOnlyCompleted){
       filteredTableData = filteredTableData.filter((data)=> data.completionDate);
     }
-    console.log(filteredTableData);
+    //console.log(filteredTableData);
 
     
 
@@ -290,20 +311,20 @@ export default function Dashboard() {
 
   const fetchDashboardvalues = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${filters.DISTRICT}`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${district}`);
       const json = await response.json();
-      console.log(json);
+      //console.log(json);
       setDashboardData({...json});
       
       // Setting Gauge Value
       const gaugeInitialValue = [["Label","value"]]
       setGaugeValue([...gaugeInitialValue]);
 
-      const inaugrationValue = ['Groundwork',parseInt((json.inaugrationCount/json.totalRecordCount) * 100)]
+      const inaugrationValue = ['Start Work',parseInt((json.inaugrationCount/json.totalRecordCount) * 100)]
       const completionValue = ['Completion',parseInt((json.completionCount/json.totalRecordCount) * 100)]
 
       setGaugeValue([...gaugeInitialValue,inaugrationValue,completionValue])
-      console.log(36,[...gaugeInitialValue,inaugrationValue,completionValue]);
+      //console.log(36,[...gaugeInitialValue,inaugrationValue,completionValue]);
 
       const initialPieValue = [["Task", "Hours per Day"]];
 
@@ -311,7 +332,7 @@ export default function Dashboard() {
         initialPieValue.push([values.TALUKA,values.count])
       })
 
-      console.log([...initialPieValue]);
+      //console.log([...initialPieValue]);
       setPieValue([...initialPieValue]);
 
       const stackedBarChartValue = json.stackedBarChart;
@@ -332,7 +353,7 @@ export default function Dashboard() {
         result.push(row);
       });
     
-    console.log(72,result);
+    //console.log(72,result);
     setStackedBarChart([...result]);
 
     }
@@ -343,9 +364,9 @@ export default function Dashboard() {
 
   const fetchMapMarkerLocations = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${filters.DISTRICT}`);
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${district}`);
       const json = await response.json();
-      //console.log(json);
+      ////console.log(json);
       
       if(json.code === 200){
         setmapMarkerList([...json.data])
@@ -363,25 +384,22 @@ export default function Dashboard() {
       dispatch(addPicklistValues(data.data));
 
       const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
-      const talukaValues = [...new Set(data.data.map(item => item.TALUKA))];
 
+ 
+      const assignedDistrict = district.length > 0 ? district : 'Surat'; 
+      const filteredTalukas = data.data.filter((data)=>{
+        return data.DISTRICT === assignedDistrict
+      });
+    
+      const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
+        //console.log(370,talukaValues);
       await localStorage.setItem('Talukas',talukaValues.toString());
 
-      if(filters.DISTRICT && filters.DISTRICT.length > 0){
-        const filteredTalukas = data.data.filter((data)=>{
-          return data.DISTRICT === filters.DISTRICT
-        });
-    
-        const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
-        console.log(370,talukaValues);
-    
-        setPicklistValues({
-          district: [...districtValues],
-          taluka: [...talukaValues],
-          village:[]
-        });
-      }
-
+      setPicklistValues((prev)=>({
+        ...prev,
+        district: [...districtValues],
+        taluka: [...talukaValues]
+      }));
     }catch(error){
       throw error;
     }
@@ -389,7 +407,7 @@ export default function Dashboard() {
 
   const navigateToRecordCreation = async() =>{
     const user = await localStorage.getItem('authToken') || await localStorage.getItem('userData');
-    console.log(386,user)
+    //console.log(386,user)
     if(user){
       navigate('/create');
       return
@@ -417,55 +435,47 @@ export default function Dashboard() {
     }
   };
 
-  
 
   const handleDistrictChange = (e) => {
-    const selectedDistrict = e.target.value;
+    const selectedDistrict = e;
     // setSelectedCity(selectedDistrict)
-    setFilters(prevFilters=>({
-      ...prevFilters,
-      DISTRICT:selectedDistrict,
-      TALUKA:'',
-      VILLAGE:''
-    }))
+    setDistrict(selectedDistrict);
 
     const filteredTalukas = picklistData.filter((data)=>{
       return data.DISTRICT === selectedDistrict
     });
 
     const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
-    console.log(423, talukaValues);
+    //console.log(423, talukaValues);
 
 
     setPicklistValues({...picklistValues,taluka:[...talukaValues]});
   }
 
-  const handleTalukaChange = (e) => {
-    const selectedTaluka = e.target.value;
-    console.log(118,selectedTaluka);
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      TALUKA: selectedTaluka,
-      VILLAGE: '',
-    }));
-    // console.log(438,picklistData);
-    const filteredVillages = picklistData.filter((data) => {
+  const handleTalukaChange = (taluka,district) => {
+    const selectedTaluka = taluka;
+    //console.log(118,selectedTaluka);
+    setTaluka(taluka);
+    setDistrict(district)
+    const unfilteredPicklistValues = picklistValues && picklistValues.length > 0 ? picklistValues :masterPicklistValues
+    const filteredVillages = unfilteredPicklistValues.filter((data) => {
       
       const normalizedDataDistrict = data.DISTRICT.trim().toLowerCase();
-      const normalizedFilterDistrict = filters.DISTRICT.trim().toLowerCase();
-      
-      return data.TALUKA === selectedTaluka && normalizedDataDistrict === normalizedFilterDistrict;
+      const normalizedFilterDistrict = district.trim().toLowerCase();
+
+      return data.TALUKA.trim().toLowerCase() === selectedTaluka.trim().toLowerCase() && normalizedDataDistrict === normalizedFilterDistrict;
     });
+
     
     const villageValues = [...new Set(filteredVillages.map(item => item.VILLAGE))];
-    
-    setPicklistValues({ ...picklistValues, village: [...villageValues] });
+    //console.log(460,villageValues)
+    setPicklistValues({ ...picklistValues, village: villageValues });
   };
   
 
   const processRowUpdate = (newRow, oldRow) => {
 
-    console.log('Row updated:', newRow);
+    //console.log('Row updated:', newRow);
 
     const rowsToUpdate = {
       ID: newRow.id,
@@ -480,26 +490,32 @@ export default function Dashboard() {
       IMPLIMANTATION_AUTHORITY: newRow.implementationAuthority || null, // If authority exists, otherwise null
       // Add any other fields that might be needed from the original object
     }
-    console.log(296,rowsToUpdate);
+    //console.log(296,rowsToUpdate);
     updateRecords(rowsToUpdate);
     
     return newRow;
   };
 
   const handleMarkerClick = (index) => {
-    console.log(276,index);
+    //console.log(276,index);
     setActiveMarker(index);
-  };
-
-  const handleMouseOut = () => {
-    setActiveMarker(null);
   };
 
   const checkIfTalukaAssignedToUser = async()=>{
     let userData = await localStorage.getItem('userData');
     if(userData){
+      
       userData = JSON.parse(userData);
       userData.taluka ? setIsTalukaAssignedToUser(true) : setIsTalukaAssignedToUser(false);
+      userData.district ? setIsDistrictAssignedToUser(true) : setIsDistrictAssignedToUser(false)  
+
+      if(userData.district){
+        handleDistrictChange(userData.district);
+      }
+
+      if(userData.taluka){
+        handleTalukaChange(userData.taluka,userData.district)
+      }
       return;
     }
     setIsTalukaAssignedToUser(false)
@@ -593,7 +609,7 @@ export default function Dashboard() {
              <div className="row">
                <div className="col-8">
                  <div class="card-body">
-                   <div style={{fontSize:10}} class="card-text">GroundWork</div>
+                   <div style={{fontSize:10}} class="card-text">Start Work</div>
                    <h4 class="card-title">{dashboardData.inaugrationCount}</h4>
                  </div>
                </div>
@@ -640,7 +656,7 @@ export default function Dashboard() {
                       <>
                         <Marker
                           key={index}
-                          title={`Village:${marker.Village}, Location:${marker.Location} , GroundWork Date : ${
+                          title={`Village:${marker.Village}, Location:${marker.Location} , Start Work Date : ${
                             marker.Inauguration_DATE ? marker.Inauguration_DATE : null
                           }`}
                           position={{ lat: parseFloat(marker.Latitude), lng: parseFloat(marker.longitude) }}
@@ -687,7 +703,7 @@ export default function Dashboard() {
                                 </span>
                                 {mapMarkerList[activeMarker].Inauguration_DATE && (
                                   <span className="card-text mt-1" style={{ fontSize: 10,display:'block' }}>
-                                    GroundWork Date:   <b> 
+                                    Start Work Date:   <b> 
                                       {new Date(mapMarkerList[activeMarker].Inauguration_DATE).toLocaleDateString('en-GB', {
                                         day: '2-digit', 
                                         month: '2-digit', 
@@ -772,7 +788,7 @@ export default function Dashboard() {
          </div>
          <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
            <div class="card" style={{marginTop:10,height:250}}>
-             <h5 class="card-title">GroundWork & Completion Status (in %)</h5>
+             <h5 class="card-title">Start Work & Completion Status (in %)</h5>
              <div
                 style={{
                   display: 'flex',
@@ -823,7 +839,7 @@ export default function Dashboard() {
                       <div class="form-check">
                         <input class="form-check-input" type="checkbox" onChange={(e)=> setShowOnlyGroundwork(e.target.checked)} value="" id="flexCheckDefault"/>
                         <label class="form-check-label" for="flexCheckDefault">
-                          Groundwork Completed Records
+                          Start Work Completed Records
                         </label>
                       </div>
                     </div>
@@ -848,9 +864,9 @@ export default function Dashboard() {
                     !isTalukaAssignedToUser ? 
                       <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                         <select
-                          value={filters.DISTRICT}
+                          value={district}
                           onChange={(e) => {
-                            handleDistrictChange(e);
+                            handleDistrictChange(e.target.value);
                           }}
                         >
                           <option value={null}>Select District</option>
@@ -870,9 +886,9 @@ export default function Dashboard() {
                     !isTalukaAssignedToUser ?
                     <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                       <select
-                        value={filters.TALUKA}
+                        value={taluka}
                         onChange={(e) => {
-                          handleTalukaChange(e);
+                          handleTalukaChange(e.target.value,district);
                         }}
                       >
                         <option value=''>Select Taluka</option>
@@ -890,9 +906,9 @@ export default function Dashboard() {
 
                   <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                     <select
-                      value={filters.VILLAGE}
+                      value={village}
                       onChange={(e) => {
-                        setFilters({ ...filters, VILLAGE: e.target.value });
+                        setVillage(e.target.value)
                       }}
                     >
                       <option value=''>Select Village</option>
@@ -929,84 +945,6 @@ export default function Dashboard() {
                 
             </div>
          </div>
-
-
-
-         <div className="col-12 mt-4 mb-2 d-block d-sm-none">
-          <div className="row">
-            <div className="col-6 mb-2">
-              <select
-                value={filters.DISTRICT}
-                onChange={(e) => {
-                  handleTalukaChange(e);
-                }}
-              >
-                <option value="null">Select District</option>
-                {picklistValues.district.map((district, index) => (
-                  <option key={index} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-6 mb-2">
-              <select
-                value={filters.TALUKA}
-                onChange={(e) => {
-                  handleTalukaChange(e);
-                }}
-              >
-                <option value="null">Select Taluka</option>
-                {picklistValues.taluka.map((taluka, index) => (
-                  <option key={index} value={taluka}>
-                    {taluka}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-6 mb-2">
-              <select
-                value={filters.VILLAGE}
-                onChange={(e) => {
-                  setFilters({ ...filters, VILLAGE: e.target.value });
-                }}
-              >
-                <option value="null">Select Village</option>
-                {picklistValues.village.map((village, index) => (
-                  <option key={index} value={village}>
-                    {village}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-6 mb-2">
-              {isLoggedIn ? (
-                <button
-                  type="button"
-                  style={{ height: 40, fontSize: 12 }}
-                  onClick={() => navigateToRecordCreation()}
-                  className="btn btn-primary w-100"
-                >
-                  Create New Record
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  style={{ height: 40, fontSize: 12 }}
-                  onClick={() => navigate('/login')}
-                  className="btn btn-primary w-100"
-                >
-                  Login to Edit/Create
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-         
          
          <Paper sx={{ height: 400, width: '100%' }}>
             <DataGrid

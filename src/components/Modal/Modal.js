@@ -209,7 +209,7 @@ const formatDate = (date) => {
 
             {/* Inauguration Date */}
             <Form.Group controlId="inaugurationDate" style={{ marginBottom: 10 }}>
-              <Form.Label>Groundwork Date</Form.Label>
+              <Form.Label>Start Work Date</Form.Label>
               <Form.Control
                 type="date"
                 name="inaugurationDate"
@@ -230,7 +230,7 @@ const formatDate = (date) => {
 
             {/* Inauguration Photo */}
             <Form.Group controlId="inaugurationPhoto" style={{ marginBottom: 10 }}>
-              <Form.Label>Groundwork Photo</Form.Label>
+              <Form.Label>Start Work Photo</Form.Label>
               <Form.Control
                 type="file"
                 name="inaugurationPhoto"
