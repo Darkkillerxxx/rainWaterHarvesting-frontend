@@ -14,6 +14,14 @@ const formatDate = (date) => {
     const [show, setShow] = useState(true);
     const [location, setLocation] = useState({ latitude: null, longitude: null });
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    
+
+    const notifyUser = (message) => {
+        // Your notification logic here (e.g., toast, alert)
+        alert(message); // Replace with a better notification system
+    };
+
 
     // Initialize formData with selectedData (default values)
     const [formData, setFormData] = useState({
@@ -132,22 +140,66 @@ const formatDate = (date) => {
 
 
   const handleLocationCapture = (e) => {
+    // e.preventDefault();
+    // if (navigator.geolocation) {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (position) => {
+    //       const { latitude, longitude } = position.coords;
+    //       setLocation({ latitude, longitude });
+    //       setError(null); // Clear any previous errors
+    //       alert('Location Updated');
+    //     },
+    //     (error) => {
+    //       setError('Error retrieving location. Please try again.');
+    //       console.error(error);
+    //     }
+    //   );
+    // } else {
+    //   setError('Geolocation is not supported by this browser.');
+    // }
     e.preventDefault();
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-          setError(null); // Clear any previous errors
-          alert('Location Updated');
-        },
-        (error) => {
-          setError('Error retrieving location. Please try again.');
-          console.error(error);
+    
+    // Ask user if they want to update their location
+    const userConfirmed = window.confirm("Would you like to update your location?");
+    
+    if (userConfirmed) {
+        if (navigator.geolocation) {
+            setLoading(true); // Start loading state
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ latitude, longitude });
+                    setError(null); // Clear any previous errors
+                    setLoading(false); // End loading state
+                    notifyUser('Location Updated');
+                },
+                (error) => {
+                    setLoading(false); // End loading state
+                    let errorMessage;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'User denied the request for Geolocation.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information is unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'The request to get user location timed out.';
+                            break;
+                        case error.UNKNOWN_ERROR:
+                        default:
+                            errorMessage = 'An unknown error occurred.';
+                    }
+                    setError(errorMessage);
+                    console.error(error);
+                }
+            );
+        } else {
+            setError('Geolocation is not supported by this browser.');
         }
-      );
     } else {
-      setError('Geolocation is not supported by this browser.');
+        setError('Location update canceled by user.');
     }
   };
 
