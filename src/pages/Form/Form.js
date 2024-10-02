@@ -229,7 +229,7 @@ const Form = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="Inauguration_DATE">Date *</label>
+            <label htmlFor="Inauguration_DATE">Start Date *</label>
             <input
               id="Inauguration_DATE"
               name="Inauguration_DATE"
@@ -240,7 +240,7 @@ const Form = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="photo">Upload a Photo *</label>
+            <label htmlFor="photo">Start Photo Upload *</label>
             <input
               id="photo"
               name="photo"

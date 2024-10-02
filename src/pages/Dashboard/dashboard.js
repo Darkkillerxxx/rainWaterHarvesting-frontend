@@ -766,66 +766,7 @@ export default function Dashboard() {
           
          </div>
        </div>
-       <div className="row">
-         <div className="col-xl-8 col-l-8 col-m-8 col-xs-12">
-           <div class="card" style={{marginTop:10,height:250}}>
-           <h5 class="card-title">Pie Chart for all Talukas</h5>
-             <Chart
-               chartType="PieChart"
-               data={pieValue}
-               width={"100%"}
-               height={"200px"}
-               options={{
-                pieSliceText: 'value', // Display the values
-                chartArea: {
-                  width: '90%',  // Increase the pie chart area width
-                  height: '90%'  // Increase the pie chart area height
-                }
-                // You can also use 'percentage' to display percentages
-              }}
-             />
-           </div>
-         </div>
-         <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
-           <div class="card" style={{marginTop:10,height:250}}>
-             <h5 class="card-title">Start Work & Completion Status (in %)</h5>
-             <div
-                style={{
-                  display: 'flex',
-                  width: '100%',
-                  alignContent: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Chart
-                  chartType="Gauge"
-                  width="80%"
-                  data={gaugeValue}
-                  options={{
-                    width: 500,
-                    height: 150,
-                    blueFrom: 90,
-                    blueTo: 100,
-                    greenFrom: 75,
-                    greenTo: 100,
-                    minorTicks: 5,
-                    
-                  }}
-                />
-                <style>
-                  {`
-                    @media (max-width: 768px) {
-                      div {
-                        justify-content: flex-start !important;
-                        padding-left: 10px;
-                      }
-                    }
-                  `}
-                </style>
-              </div>
-           </div>
-         </div>
-         
+
          {/* Insert Table Here */}
          <div className="col-12 mt-4 mb-2 d-none d-sm-block">
             <div className="row mb-3">
@@ -957,6 +898,65 @@ export default function Dashboard() {
               experimentalFeatures={{ newEditingApi: true }}
             />
           </Paper>
+       <div className="row">
+         <div className="col-xl-8 col-l-8 col-m-8 col-xs-12">
+           <div class="card" style={{marginTop:10,height:250}}>
+           <h5 class="card-title">Pie Chart for all Talukas</h5>
+             <Chart
+               chartType="PieChart"
+               data={pieValue}
+               width={"100%"}
+               height={"200px"}
+               options={{
+                pieSliceText: 'value', // Display the values
+                chartArea: {
+                  width: '90%',  // Increase the pie chart area width
+                  height: '90%'  // Increase the pie chart area height
+                }
+                // You can also use 'percentage' to display percentages
+              }}
+             />
+           </div>
+         </div>
+         <div className="col-xl-4 col-l-4 col-m-6 col-xs-12">
+           <div class="card" style={{marginTop:10,height:250}}>
+             <h5 class="card-title">Start Work & Completion Status (in %)</h5>
+             <div
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  alignContent: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Chart
+                  chartType="Gauge"
+                  width="80%"
+                  data={gaugeValue}
+                  options={{
+                    width: 500,
+                    height: 150,
+                    blueFrom: 90,
+                    blueTo: 100,
+                    greenFrom: 75,
+                    greenTo: 100,
+                    minorTicks: 5,
+                    
+                  }}
+                />
+                <style>
+                  {`
+                    @media (max-width: 768px) {
+                      div {
+                        justify-content: flex-start !important;
+                        padding-left: 10px;
+                      }
+                    }
+                  `}
+                </style>
+              </div>
+           </div>
+         </div>
         
          <div className="col-12">
           {
