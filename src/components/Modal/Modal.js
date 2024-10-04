@@ -134,7 +134,8 @@ const formatDate = (date) => {
         inaugurationPhoto: rowData.inaugurationPhoto || null,
         completionDate: formatDate(rowData.completionDate), // Format date
         completionPhoto: rowData.completionPhoto || null,
-        workName:rowData.work || null
+        workName:rowData.work || null,
+        implementationAuthority:rowData.implementationAuthority || null
       });
     }, [picklistOptions, rowData]);
 
@@ -254,7 +255,8 @@ const formatDate = (date) => {
                 as="textarea"
                 rows={3}
                 name="location"
-                value={formData.location} // Set the value to selected data
+                value={formData.location}
+                disabled={true} // Set the value to selected data
                 onChange={handleChange}
               />
             </Form.Group>
@@ -275,7 +277,19 @@ const formatDate = (date) => {
               <Form.Control
                 type="text"
                 name="workName"
+                disabled={true}
                 value={formData.workName} // Set the value to selected data
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="implementationAuthority" style={{ marginBottom: 10 }}>
+              <Form.Label>Implementation Authority</Form.Label>
+              <Form.Control
+                type="text"
+                name="implementationAuthority"
+                disabled={true}
+                value={formData.implementationAuthority} // Set the value to selected data
                 onChange={handleChange}
               />
             </Form.Group>
@@ -298,6 +312,7 @@ const formatDate = (date) => {
                 />
               )}
             </Form.Group>
+            
 
             {/* Completion Date */}
             <Form.Group controlId="completionDate" style={{ marginBottom: 10 }}>

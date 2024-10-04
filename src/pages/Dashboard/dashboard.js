@@ -7,7 +7,7 @@ import { FaRoad } from "react-icons/fa6";
 import { RiRoadMapFill } from "react-icons/ri";
 import { TbTargetArrow } from "react-icons/tb";
 import { GiInauguration } from "react-icons/gi";
-import { FaRegThumbsUp,FaFileCsv,FaFilePdf } from "react-icons/fa";
+import { FaRegThumbsUp,FaFileCsv,FaFilePdf,FaRegWindowClose  } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { CiLogin } from "react-icons/ci";
 import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
@@ -47,6 +47,7 @@ export default function Dashboard() {
   const [tableCount,setTableCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchText,setSearchText] = useState("");
+  const [isAdmin,setIsAdmin] = useState(false);
   const [filters, setFilters] = useState({
     DISTRICT: 'Surat',
     TALUKA: '',
@@ -118,20 +119,40 @@ export default function Dashboard() {
     {
       field: 'inaugurationPhoto',
       headerName: 'Start Work Photo',
-      width: 150,
+      width: 250,
       renderCell: (params) => (
         params.row.inaugurationPhoto ? (
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => {
-              setImagePopUp(true)
-              setImagePopUpURL(params.row.inaugurationPhoto)
-            }}
-          >
-            View Image
-          </Button>
+          <div style={{width:'100%',marginTop:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <Button
+              style={{width:200}}
+              variant="contained"
+              color="secondary"
+              size="small"
+              onClick={() => {
+                setImagePopUp(true)
+                setImagePopUpURL(params.row.inaugurationPhoto)
+              }}
+            >
+              View Image
+            </Button>
+            {
+              isAdmin ? 
+              <Button
+                style={{width:50,marginLeft:10}}
+                variant="contained"
+                color="secondary"
+                size="small"
+                onClick={() => {
+                  resetImage(params.row.id,1)
+                }}
+              >
+                <FaRegWindowClose size={20}/>
+              </Button>
+              :
+              null
+            }
+            
+          </div>
         ) : (
           <span>No Image</span> // Optional placeholder when no image is available
         )
@@ -140,20 +161,41 @@ export default function Dashboard() {
     {
       field: 'completionPhoto',
       headerName: 'Completion Photo',
-      width: 150,
+      width: 250,
       renderCell: (params) => (
         params.row.completionPhoto ? (
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => {
-              setImagePopUp(true)
-              setImagePopUpURL(params.row.completionPhoto)
-            }}
-          >
-            View Image
-          </Button>
+          <div style={{width:'100%',marginTop:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              onClick={() => {
+                setImagePopUp(true)
+                setImagePopUpURL(params.row.completionPhoto)
+              }}
+            >
+              View Image
+            </Button>
+            {
+              isAdmin ? 
+              <Button
+                style={{width:50,marginLeft:10}}
+                variant="contained"
+                color="secondary"
+                size="small"
+                onClick={() => {
+                  resetImage(params.row.id,0)
+
+                }}
+              >
+                <FaRegWindowClose size={20}/>
+              </Button>
+              :
+              null
+            }
+
+          </div>
+          
         ) : (
           <span>No Image</span> // Optional placeholder when no image is available
         )
@@ -167,6 +209,47 @@ export default function Dashboard() {
   const handleEditClick = (data) =>{
     setSelectedData({...data});
     setShowModal(true);
+  }
+
+  const resetImage = async(recordId,recordType) =>{
+    try{
+      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/resetImage`,
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body:JSON.stringify({
+            recordId:recordId,
+            type:recordType
+          })
+        });
+    
+      const jsonResponse = await response.json();
+      
+      if(jsonResponse?.code != 200){
+        alert('Something Went Wrong');
+        return
+      }
+      alert('Image Deleted Successfully');
+      const updatedTableData = tableDataToShow.map((data) => {
+      
+        if (data.id === recordId) {
+          console.log(237);
+          // Update the specific field based on recordType
+          if (recordType === 1) {
+            return { ...data, inaugurationPhoto: null }; // Clear Inauguration_PHOTO1
+          } else {
+            return { ...data, completionPhoto: null }; // Clear COMPLETED_PHOTO1
+          }
+        }
+        return data; // Return unchanged records
+      });
+
+      setTableDataToShow([...updatedTableData]);
+    }catch(error){
+      console.log(error.message);
+    } 
   }
 
   const triggerModal = () =>{
@@ -201,7 +284,8 @@ export default function Dashboard() {
         work:data.WORK_NAME ? data.WORK_NAME : null, 
         completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,
         isGroundworkPhotoApproved:data.IS_GROUNDWORK_PHOTO_APPROVED ? true : false,
-        isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false
+        isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false,
+        implementationAuthority:data.IMPLIMANTATION_AUTHORITY
           // Parse the date
       }));
   
@@ -218,6 +302,10 @@ export default function Dashboard() {
   const triggerIsLoggedIn = async() =>{
     let userData = await localStorage.getItem('userData');
     if(userData){
+      if(!userData.district && !userData.taluka){
+        setIsAdmin(true);
+      }
+
       userData = JSON.parse(userData);
       setUsername(userData.user);
 

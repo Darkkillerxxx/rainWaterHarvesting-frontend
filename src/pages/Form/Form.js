@@ -32,6 +32,7 @@ const Form = () => {
   const [photo, setPhoto] = useState(null);
   const [WORK_NAME,setWorkName] = useState(null);
   const [isLoading,setIsLoading] = useState(false);
+  const [IMPLIMANTATION_AUTHORITY,setImplementationAuthority] = useState("");
 
   useEffect(() => {
     if (navigator.geolocation !== null) {
@@ -81,6 +82,9 @@ const Form = () => {
       case "Inauguration_DATE":
         setDate(value);
         break;
+      case "IMPLIMANTATION_AUTHORITY":
+        setImplementationAuthority(value);
+        break;
       case "WorkName":
         setWorkName(value);
         break;
@@ -114,6 +118,7 @@ const Form = () => {
       Latitude,
       Longitude,
       WORK_NAME,
+      IMPLIMANTATION_AUTHORITY,
       Inauguration_PHOTO1: photo, // Note: You can't send files directly in JSON
     };
 
@@ -136,6 +141,7 @@ const Form = () => {
     setPhoto(null);
     setWorkName(null);
     setInaugurationPhoto(null);
+    setImplementationAuthority("")
    }
    catch(error){
     alert("Something went wrong :-"+error);
@@ -207,6 +213,17 @@ const Form = () => {
             </div>
           </div>
           <div className="form-group">
+            <label htmlFor="IMPLIMANTATION_AUTHORITY">Implimantation Authority *</label>
+            <input
+              id="IMPLIMANTATION_AUTHORITY"
+              name="IMPLIMANTATION_AUTHORITY"
+              type="text"
+              value={IMPLIMANTATION_AUTHORITY}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="LOCATION">Location *</label>
             <input
               id="LOCATION"
@@ -229,7 +246,7 @@ const Form = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="Inauguration_DATE">Start Date *</label>
+            <label htmlFor="Inauguration_DATE">Start Work Date *</label>
             <input
               id="Inauguration_DATE"
               name="Inauguration_DATE"
