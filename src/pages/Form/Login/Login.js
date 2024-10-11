@@ -110,42 +110,6 @@ export const Login = () => {
               {/* Email input */}
 
               <label className="form-label" htmlFor="form3Example3">
-                  Select District
-              </label>
-              <div className="form-outline mb-4">
-              <select
-                  value={district}
-                  onChange={(e) => {
-                    onDistrictSelect(e)
-                  }}>
-                    <option value=''>Select District</option>
-                    {pickListValues?.district?.map((value)=>{
-                      return(
-                        <option key={value} value={value}>{value}</option>
-                      )
-                    })}
-                </select>
-              </div>
-
-              <label className="form-label" htmlFor="form3Example3">
-                  Select Taluka
-              </label>
-              <div className="form-outline mb-4">
-              <select
-                  value={taluka}
-                  onChange={(e) => {
-                    setTaluka(e.target.value)
-                  }}>
-                    <option value=''>Select Taluka</option>
-                      {pickListValues?.talukas?.map((taluka, index) => (
-                        <option key={index} value={taluka}>
-                          {taluka}
-                        </option>
-                    ))}
-                </select>
-              </div>
-
-              <label className="form-label" htmlFor="form3Example3">
                   Email address
               </label>
               <div className="form-outline mb-4">

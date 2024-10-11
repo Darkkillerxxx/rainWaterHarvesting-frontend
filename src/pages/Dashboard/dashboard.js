@@ -258,21 +258,30 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
+    let userData = await localStorage.getItem('userData');
+    if(userData){
+      userData = JSON.parse(userData);
+    }
+
     // //console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    const headers = {
+      "Cache-Control": "no-cache"
+    }
+    if(userData?.accessToken){
+      headers.Authorization=`Bearer ${userData?.accessToken}`
+    }
     if(district.length > 0){
       const response = await fetch(
         `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${district}&Taluka=${taluka}&Village=${village}&offSet=${offset}`,
         {
           method: "GET",
-          headers: {
-            "Cache-Control": "no-cache",
-          },
+          headers: headers
         },
       );
   
-      const jsonResponse = await response.json();
+      const jsonResponse = await response?.json();
       //console.log(182,jsonResponse);
-      const rows = jsonResponse.data.data.map((data, index) => ({
+      const rows = jsonResponse?.data?.data?.map((data, index) => ({
         id: data.ID,  // Use the ID field
         district: data.DISTRICT,
         taluka: data.TALUKA,
@@ -289,11 +298,13 @@ export default function Dashboard() {
           // Parse the date
       }));
   
-      //console.log(rows);
+      console.log(292,rows);
       
-      setTableData([...rows]);
-      setTableDataToShow([...rows]);
-      setTableCount(jsonResponse.data.totalCount);
+      if(rows && rows?.length > 0){
+        setTableData([...rows]);
+        setTableDataToShow([...rows]);
+        setTableCount(jsonResponse.data.totalCount);
+      }
       triggerIsLoggedIn();
     }
    

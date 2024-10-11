@@ -108,6 +108,11 @@ const Form = () => {
     setIsLoading(true);
    try{
     e.preventDefault();
+
+    let userData = await localStorage.getItem('userData');
+    if(userData){
+      userData = JSON.parse(userData);
+    }
   
     const data = {
       DISTRICT,
@@ -124,7 +129,13 @@ const Form = () => {
 
     console.log(data);
 
-    const res = await axios.post("https://rainwaterharvesting-backend.onrender.com/createRecords",data)
+    const res = await axios.post("https://rainwaterharvesting-backend.onrender.com/createRecords",data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userData?.accessToken}`,  // Replace with your actual token if needed
+        // You can add more headers as needed
+      }
+    })
     if(res){
       alert("Successfully added to the table");
       console.log("Successfully added to the table\nRes:", res);
