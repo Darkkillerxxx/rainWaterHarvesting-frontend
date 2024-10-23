@@ -39,7 +39,8 @@ export const Login = () => {
       const data = await response.json();
 
       if (data.code === 200) {
-        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:taluka,district:district}));
+        console.log(42,data.userData)
+        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:data.userData.TALUKA,district:data.userData.DISTRICT,userId:data.userData.ID}));
         alert("Login successful!");
         navigate('/');
         // Redirect user to another page or perform another action after login
@@ -74,20 +75,6 @@ export const Login = () => {
     loadDistrictList();
   },[])
 
-  const onDistrictSelect = (e) =>{
-    setDistrict(e.target.value);
-
-    const filteredTalukas = masterPicklistValues.filter((data)=>{
-      return data.DISTRICT === e.target.value
-    });
-    
-    const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
-  
-    setPickListValues((prev)=>({
-      ...prev,
-      talukas:[...talukaValues]
-    }))
-  }
 
   return (
     <section className="vh-100">

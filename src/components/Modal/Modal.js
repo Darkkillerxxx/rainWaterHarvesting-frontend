@@ -141,23 +141,6 @@ const formatDate = (date) => {
 
 
   const handleLocationCapture = (e) => {
-    // e.preventDefault();
-    // if (navigator.geolocation) {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (position) => {
-    //       const { latitude, longitude } = position.coords;
-    //       setLocation({ latitude, longitude });
-    //       setError(null); // Clear any previous errors
-    //       alert('Location Updated');
-    //     },
-    //     (error) => {
-    //       setError('Error retrieving location. Please try again.');
-    //       console.error(error);
-    //     }
-    //   );
-    // } else {
-    //   setError('Geolocation is not supported by this browser.');
-    // }
     e.preventDefault();
     
     // Ask user if they want to update their location
@@ -217,6 +200,7 @@ const formatDate = (date) => {
                 name="district"
                 value={formData.district} // Set the value to selected data
                 onChange={handleChange}
+                disabled={!rowData.canEdit}
               >
                 <option value="">{formData.district}</option>
               </Form.Control>
@@ -230,6 +214,7 @@ const formatDate = (date) => {
                 name="taluka"
                 value={formData.taluka} // Set the value to selected data
                 onChange={handleChange}
+                disabled={!rowData.canEdit}
               >
                 <option value="">{formData.taluka}</option>
               </Form.Control>
@@ -243,6 +228,7 @@ const formatDate = (date) => {
                 name="village"
                 value={formData.village} // Set the value to selected data
                 onChange={handleChange}
+                disabled={!rowData.canEdit}
               >
                 <option value="">{formData.village}</option>
               </Form.Control>
@@ -269,6 +255,7 @@ const formatDate = (date) => {
                 name="inaugurationDate"
                 value={formData.inaugurationDate} // Set the value to selected data
                 onChange={handleChange}
+                disabled={!rowData.canEdit}
               />
             </Form.Group>
 
@@ -295,23 +282,29 @@ const formatDate = (date) => {
             </Form.Group>
 
             {/* Inauguration Photo */}
-            <Form.Group controlId="inaugurationPhoto" style={{ marginBottom: 10 }}>
-              <Form.Label>Start Work Photo</Form.Label>
-              <Form.Control
-                type="file"
-                name="inaugurationPhoto"
-                onChange={handleChange}
-              />
-              {/* Show the image if base64 is available */}
-              {formData.inaugurationPhotoBase64 && (
-                <Image
-                  src={formData.inaugurationPhotoBase64}
-                  alt="Groundwork Preview"
-                  thumbnail
-                  style={{ marginTop: 10 }}
+            {
+              formData.canEdit ? 
+              <Form.Group controlId="inaugurationPhoto" style={{ marginBottom: 10 }}>
+                <Form.Label>Start Work Photo</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="inaugurationPhoto"
+                  onChange={handleChange}
                 />
-              )}
-            </Form.Group>
+                {/* Show the image if base64 is available */}
+                {formData.inaugurationPhotoBase64 && (
+                  <Image
+                    src={formData.inaugurationPhotoBase64}
+                    alt="Groundwork Preview"
+                    thumbnail
+                    style={{ marginTop: 10 }}
+                  />
+                )}
+              </Form.Group> 
+              :
+              null
+            }
+          
             
 
             {/* Completion Date */}
@@ -322,28 +315,46 @@ const formatDate = (date) => {
                 name="completionDate"
                 value={formData.completionDate} // Set the value to selected data
                 onChange={handleChange}
+                disabled={!rowData.canEdit}
               />
             </Form.Group>
 
+            {
+              formData.canEdit ? 
+              <Form.Group controlId="completionPhoto" style={{ marginBottom: 10 }}>
+                <Form.Label>Completion Photo</Form.Label>
+                <Form.Control type="file" name="completionPhoto" onChange={handleChange} />
+                {/* Show the image if base64 is available */}
+                {formData.completionPhotoBase64 && (
+                  <Image
+                    src={formData.completionPhotoBase64}
+                    alt="Completion Preview"
+                    thumbnail
+                    style={{ marginTop: 10 }}
+                  />
+                )}
+              </Form.Group>
+              :
+              null
+            }
             {/* Completion Photo */}
-            <Form.Group controlId="completionPhoto" style={{ marginBottom: 10 }}>
-              <Form.Label>Completion Photo</Form.Label>
-              <Form.Control type="file" name="completionPhoto" onChange={handleChange} />
-              {/* Show the image if base64 is available */}
-              {formData.completionPhotoBase64 && (
-                <Image
-                  src={formData.completionPhotoBase64}
-                  alt="Completion Preview"
-                  thumbnail
-                  style={{ marginTop: 10 }}
-                />
-              )}
-            </Form.Group>
-            <button className='btn btn-primary w-50 mb-3' onClick={handleLocationCapture}>Update Location</button>
+            
+            {
+              formData.canEdit ? 
+                <button className='btn btn-primary w-50 mb-3' onClick={handleLocationCapture}>Update Location</button>
+                :
+                null
+            }
             {/* Submit Button */}
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
+            {
+              formData.canEdit ? 
+                <Button variant="primary" type="submit">
+                  Submit
+                </Button>
+                :
+                null
+            }
+           
           </Form>
         </Modal.Body>
       </Modal>

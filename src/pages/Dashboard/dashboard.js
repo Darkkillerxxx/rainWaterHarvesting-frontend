@@ -14,7 +14,7 @@ import bootstrap from 'bootstrap/dist/js/bootstrap.min.js';
 import { Carousel } from 'react-bootstrap';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
-import { Button } from '@mui/material';
+import { Button, formControlClasses } from '@mui/material';
 import Modal from '../../components/Modal/Modal.js'
 import ImageModal from '../../components/Modal/ImageModal.js'
 import { CSVLink, CSVDownload } from "react-csv";
@@ -41,23 +41,18 @@ export default function Dashboard() {
   const [pieValue,setPieValue] = useState([]);
   const [stackedBarChart,setStackedBarChart] = useState([]);
   const [mapMarkerList,setmapMarkerList] = useState([]);
-  const [selectedValue, setSelectedValue] = useState(null);
   const [tableData,setTableData] = useState([]);
   const [tableDataToShow,setTableDataToShow] = useState([]);
   const [tableCount,setTableCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchText,setSearchText] = useState("");
   const [isAdmin,setIsAdmin] = useState(false);
-  const [filters, setFilters] = useState({
-    DISTRICT: 'Surat',
-    TALUKA: '',
-    VILLAGE: '',
-  });
   const [picklistValues, setPicklistValues] = useState({
     district: [],
     taluka: [],
     village: [],
   });
+  const [id,setId] = useState('');
   const [username,setUsername] = useState(null);
   const [selectedData,setSelectedData] = useState(null)
   const [showModal,setShowModal] = useState(false);
@@ -87,12 +82,12 @@ export default function Dashboard() {
           size="small"
           onClick={() => 
           {
-            //console.log(params.row);
-            handleEditClick(params.row)
+            console.log(85,id,parseInt(params.row.createdByUserId))
+            handleEditClick(params.row,parseInt(params.row.createdByUserId) === id);
           }
         }
         >
-          Edit
+          View
         </Button>
       ),
     },
@@ -206,7 +201,9 @@ export default function Dashboard() {
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  const handleEditClick = (data) =>{
+  const handleEditClick = (data,canEdit) =>{
+    data.canEdit = canEdit;
+    console.log(206,{...data});
     setSelectedData({...data});
     setShowModal(true);
   }
@@ -294,7 +291,8 @@ export default function Dashboard() {
         completionPhoto: data.COMPLETED_PHOTO1 ? data.COMPLETED_PHOTO1 : null,
         isGroundworkPhotoApproved:data.IS_GROUNDWORK_PHOTO_APPROVED ? true : false,
         isCompletedPhotoApproved:data.IS_COMPLETED_PHOTO_APPROVED ? true : false,
-        implementationAuthority:data.IMPLIMANTATION_AUTHORITY
+        implementationAuthority:data.IMPLIMANTATION_AUTHORITY,
+        createdByUserId:data.CRE_USR_ID
           // Parse the date
       }));
   
@@ -320,8 +318,13 @@ export default function Dashboard() {
       userData = JSON.parse(userData);
       setUsername(userData.user);
 
-      if(taluka != userData.taluka){
+      if(taluka != userData.taluka && userData?.taluka != null){
         setTaluka(userData.taluka);
+      }
+      console.log(323,userData)
+      if(userData.userId)
+      {
+        setId(userData.userId);
       }
       setIsLoggedIn(true)
       return;
@@ -367,6 +370,7 @@ export default function Dashboard() {
   },[district])
 
   useEffect(()=>{
+    console.log(370,taluka)
     if(taluka && taluka.length > 0 && district.length > 0){
       fetchData();
     }
@@ -392,21 +396,12 @@ export default function Dashboard() {
     if(showOnlyCompleted){
       filteredTableData = filteredTableData.filter((data)=> data.completionDate);
     }
-    //console.log(filteredTableData);
-
-    
-
-    
-  
-    setTableDataToShow([...filteredTableData]);
-     
+    setTableDataToShow([...filteredTableData]);     
   },[showOnlyGroundWork,showOnlyCompleted,searchText])
 
   const triggerImageModalVisibility = () =>{
     setImagePopUp(!showImagePopUp)
   }
-
-
 
   const fetchDashboardvalues = async() =>{
     try{
@@ -553,7 +548,7 @@ export default function Dashboard() {
 
   const handleTalukaChange = (taluka,district) => {
     const selectedTaluka = taluka;
-    //console.log(118,selectedTaluka);
+    console.log(118,taluka,district);
     setTaluka(taluka);
     setDistrict(district)
     const unfilteredPicklistValues = picklistValues && picklistValues.length > 0 ? picklistValues :masterPicklistValues
@@ -613,6 +608,7 @@ export default function Dashboard() {
       }
 
       if(userData.taluka){
+        console.log(613)
         handleTalukaChange(userData.taluka,userData.district)
       }
       return;
