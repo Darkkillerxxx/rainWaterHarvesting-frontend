@@ -101,7 +101,7 @@ const formatDate = (date) => {
         console.log(mappedData);
       
         // Send the mappedData to your backend API
-        fetch('https://rainwaterharvesting-backend.onrender.com/updateRecords', {
+        fetch('https://rainwaterharvesting-backend-1.onrender.com/updateRecords', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

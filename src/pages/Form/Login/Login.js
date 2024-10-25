@@ -28,7 +28,7 @@ export const Login = () => {
     };
 
     try {
-      const response = await fetch("https://rainwaterharvesting-backend.onrender.com/login", {
+      const response = await fetch("https://rainwaterharvesting-backend-1.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export const Login = () => {
 
       if (data.code === 200) {
         console.log(42,data.userData)
-        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:data.userData.TALUKA,district:data.userData.DISTRICT,userId:data.userData.ID}));
+        localStorage.setItem("userData", JSON.stringify({user:username,accessToken:data.token,taluka:data.userData.TALUKA && data.userData.TALUKA != 'null' ? data.userData.TALUKA : null ,district:data.userData.DISTRICT && data.userData.DISTRICT != 'null' ? data.userData.DISTRICT : null,userId:data.userData.ID}));
         alert("Login successful!");
         navigate('/');
         // Redirect user to another page or perform another action after login

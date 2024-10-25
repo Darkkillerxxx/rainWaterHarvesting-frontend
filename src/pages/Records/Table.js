@@ -42,7 +42,7 @@ export default function FilteredTable() {
 
   const fetchPicklistValues = async () => {
     try {
-      const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
+      const response = await fetch('https://rainwaterharvesting-backend-1.onrender.com/getPicklistValues');
       const data = await response.json();
       setPicklistData(data.data);
 
@@ -63,9 +63,9 @@ export default function FilteredTable() {
 
   const fetchData = async () => {
     const offset = (currentPage - 1) * itemsPerPage;
-    console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    console.log(63,`https://rainwaterharvesting-backend-1.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
     const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
+      `https://rainwaterharvesting-backend-1.onrender.com/fetchRecords?District=${filters.DISTRICT}&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`,
       {
         method: "GET",
         headers: {

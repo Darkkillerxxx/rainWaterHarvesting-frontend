@@ -19,10 +19,13 @@ const Form = () => {
   const item = location.state?.item;
 
   const [talukaOptions, setTalukaOptions] = useState([]);
+  const [villageOptions,setVillageOptions] = useState([]);
+  const [isDistrictPicklistDisabled,setIsDisrictPicklistDisabled] = useState(false);
+  const [isTalukaPicklistDisabled,setIsTalukaPicklistDisabled] = useState(false);
 
-  const [DISTRICT, setDistrict] = useState(item?.DISTRICT || "Surat");
-  const [TALUKA, setTaluka] = useState(item?.TALUKA || "BARDOLI");
-  const [VILLAGE, setVillage] = useState(item?.VILLAGE || "");
+  const [DISTRICT, setDistrict] = useState('');
+  const [TALUKA, setTaluka] = useState('');
+  const [VILLAGE, setVillage] = useState('');
   const [mobile, setMobile] = useState("");
   const [LOCATION, setAddress] = useState(item?.ENG_LOCATION || "");
   const [Inauguration_DATE, setDate] = useState("");
@@ -33,6 +36,26 @@ const Form = () => {
   const [WORK_NAME,setWorkName] = useState(null);
   const [isLoading,setIsLoading] = useState(false);
   const [IMPLIMANTATION_AUTHORITY,setImplementationAuthority] = useState("");
+ 
+
+
+  const userDetails = async() =>{
+    let userDetails = await localStorage.getItem('userData');
+    if(userDetails){
+      userDetails = JSON.parse(userDetails);
+      console.log(46,userDetails);
+      if(userDetails.taluka && userDetails.taluka != null){
+        setTaluka(userDetails.taluka);
+        handleTalukaChange(userDetails.taluka);
+        setIsTalukaPicklistDisabled(true)
+      }
+      if(userDetails.district && userDetails.district != null){
+        setDistrict(userDetails.district);
+        handleDistrictChange(userDetails.district);
+        setIsDisrictPicklistDisabled(true)
+      }
+    }
+  }
 
   useEffect(() => {
     if (navigator.geolocation !== null) {
@@ -40,24 +63,45 @@ const Form = () => {
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
       });
-      fetchTalukaOptions();
     } else {
       console.log("Browser does not support geolocation");
     }
+    
+    userDetails();
   }, []);
 
-  const fetchTalukaOptions = async () => {
-    try {
-      const response = await fetch(
-        "https://rainwaterharvesting-backend.onrender.com/getPicklistValues",
-      );
-      const jsonResponse = await response.json();
-      const uniqueTalukas = [
-        ...new Set(jsonResponse.data.map((item) => item.TALUKA)),
-      ];
-      setTalukaOptions(uniqueTalukas);
-    } catch (error) {
-      console.error("Error fetching Taluka options:", error);
+  const handleDistrictChange = async (e) => {    
+    try{
+      setDistrict(e);
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getTalukas?District=${e}`);
+      const responseData = await response.json();
+      if(responseData.code === 200){
+        const talukas = responseData.data.filter((taluka) => taluka.TALUKA).map((taluka)=> taluka.TALUKA);
+        console.log(539,talukas);
+        setTalukaOptions([...talukas]);
+      }
+    }
+    catch(error){
+      throw error;
+    }
+    const selectedDistrict = e;
+    setDistrict(selectedDistrict);
+    
+  }
+
+  const handleTalukaChange = async(e) => {
+    try{
+      setTaluka(e);
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getVillages?Taluka=${e}`);
+      const responseData = await response.json();
+      if(responseData.code === 200){
+        console.log(103,responseData)
+        const villages = responseData.data.filter((village)=> village.VILLAGE).map((village)=> village.VILLAGE);
+        setVillageOptions([...villages])
+      }
+    }
+    catch(error){
+      throw error
     }
   };
 
@@ -66,9 +110,11 @@ const Form = () => {
     switch (name) {
       case "DISTRICT":
         setDistrict(value);
+        handleDistrictChange(value);
         break;
       case "TALUKA":
         setTaluka(value);
+        handleTalukaChange(value);
         break;
       case "VILLAGE":
         setVillage(value);
@@ -129,7 +175,7 @@ const Form = () => {
 
     console.log(data);
 
-    const res = await axios.post("https://rainwaterharvesting-backend.onrender.com/createRecords",data, {
+    const res = await axios.post("https://rainwaterharvesting-backend-1.onrender.com/createRecords",data, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userData?.accessToken}`,  // Replace with your actual token if needed
@@ -174,43 +220,58 @@ const Form = () => {
           <div className="form-group grid">
             <div className="grid-item">
               <label htmlFor="DISTRICT">District *</label>
-              <select
-                id="DISTRICT"
-                name="DISTRICT"
-                value={DISTRICT}
-                onChange={handleChange}
-              >
-                <option value="Surat">Surat</option>
-                <option value="Navsari">Navsari</option>
-              </select>
+              {
+              isDistrictPicklistDisabled ? 
+                <input className="form-control" disabled={true} value={DISTRICT}/>
+              :
+                <select id="DISTRICT" name="DISTRICT" disabled={isDistrictPicklistDisabled} value={DISTRICT} onChange={(e)=> {handleChange(e)}}>
+                  <option value="Surat">Surat</option>
+                  <option value="Navsari">Navsari</option>
+                </select>
+              }
             </div>
+            
             <div className="grid-item">
               <label htmlFor="TALUKA">Taluka *</label>
+              {
+                isTalukaPicklistDisabled ?
+                <input className="form-control" disabled={true} value={TALUKA}/>
+                :
+                <select
+                  id="TALUKA"
+                  name="TALUKA"
+                  value={TALUKA}
+                  disabled={isTalukaPicklistDisabled}
+                  onChange={handleChange}
+                >
+                  <option key={null} value="None"/>
+
+                  {talukaOptions.map((taluka, index) => (
+                    <option key={index} value={taluka}>
+                      {taluka}
+                    </option>
+                  ))}
+                </select>
+              }
+              
+            </div>
+          </div>
+          <div className="form-group grid">
+            <div className="grid-item">
+              <label htmlFor="Village">Village *</label>
               <select
-                id="TALUKA"
-                name="TALUKA"
-                value={TALUKA}
+                id="VILLAGE"
+                name="VILLAGE"
+                value={VILLAGE}
                 onChange={handleChange}
               >
-                {talukaOptions.map((taluka, index) => (
+              <option key={null} value="None"/>
+                {villageOptions.map((taluka, index) => (
                   <option key={index} value={taluka}>
                     {taluka}
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
-          <div className="form-group grid">
-            <div className="grid-item">
-              <label htmlFor="VILLAGE">Village *</label>
-              <input
-                id="VILLAGE"
-                name="VILLAGE"
-                type="text"
-                value={VILLAGE}
-                onChange={handleChange}
-                required
-              />
             </div>
             <div className="grid-item">
               <label htmlFor="mobile">Your Mobile No</label>
@@ -218,7 +279,7 @@ const Form = () => {
                 id="mobile"
                 name="mobile"
                 type="tel"
-                value={mobile}
+                value={mobile}  
                 onChange={handleChange}
               />
             </div>

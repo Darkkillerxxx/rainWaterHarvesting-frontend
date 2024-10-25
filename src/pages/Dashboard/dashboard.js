@@ -22,7 +22,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addPicklistValues } from '../../features/picklistValuesSlice.js';
 
 
-//https://rainwaterharvesting-backend.onrender.com
+//https://rainwaterharvesting-backend-1.onrender.com
 //http://103.116.176.242:3000
 
 
@@ -52,6 +52,10 @@ export default function Dashboard() {
     taluka: [],
     village: [],
   });
+  const [districtPicklistValues,setDistrictPicklistValues] = useState([]);
+  const [talukaPicklistValues,setTalukaPicklistValues] = useState([]);
+  const [villagePicklistValues,setVillagePicklistValues] = useState([]);
+
   const [id,setId] = useState('');
   const [username,setUsername] = useState(null);
   const [selectedData,setSelectedData] = useState(null)
@@ -61,7 +65,6 @@ export default function Dashboard() {
 
   const [isLoggedIn,setIsLoggedIn] = useState(true)
   const [activeMarker, setActiveMarker] = useState(null);
-  const [picklistData, setPicklistData] = useState([]);  // Added picklistData state
   const [showImagePopUp,setImagePopUp] = useState(false);
   const [imagePopUpURL,setImagePopUpURL] = useState(null);
   const [isTalukaAssignedToUser,setIsTalukaAssignedToUser] = useState(false);
@@ -210,7 +213,7 @@ export default function Dashboard() {
 
   const resetImage = async(recordId,recordType) =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/resetImage`,
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/resetImage`,
         {
           method: "POST",
           headers: {
@@ -260,7 +263,7 @@ export default function Dashboard() {
       userData = JSON.parse(userData);
     }
 
-    // //console.log(63,`https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
+    // //console.log(63,`https://rainwaterharvesting-backend-1.onrender.com/fetchRecords?District=SURAT&Taluka=${filters.TALUKA}&Village=${filters.VILLAGE}&offSet=${offset}`)
     const headers = {
       "Cache-Control": "no-cache"
     }
@@ -269,7 +272,7 @@ export default function Dashboard() {
     }
     if(district.length > 0){
       const response = await fetch(
-        `https://rainwaterharvesting-backend.onrender.com/fetchRecords?District=${district}&Taluka=${taluka}&Village=${village}&offSet=${offset}`,
+        `https://rainwaterharvesting-backend-1.onrender.com/fetchRecords?District=${district}&Taluka=${taluka}&Village=${village}&offSet=${offset}`,
         {
           method: "GET",
           headers: headers
@@ -319,6 +322,7 @@ export default function Dashboard() {
       setUsername(userData.user);
 
       if(taluka != userData.taluka && userData?.taluka != null){
+        console.log(325)
         setTaluka(userData.taluka);
       }
       console.log(323,userData)
@@ -334,7 +338,7 @@ export default function Dashboard() {
 
   const getSliderImages=async()=>{
     const response = await fetch(
-      `https://rainwaterharvesting-backend.onrender.com/getSliderImages`,
+      `https://rainwaterharvesting-backend-1.onrender.com/getSliderImages`,
       {
         method: "GET",
         headers: {
@@ -351,10 +355,10 @@ export default function Dashboard() {
   }
 
   useEffect(()=>{
-    //console.log(142);
     fetchData();
     checkIfTalukaAssignedToUser();
     fetchPicklistValues();
+    fetchDistrictPicklistValues();
     getSliderImages();
   },[])
 
@@ -405,9 +409,8 @@ export default function Dashboard() {
 
   const fetchDashboardvalues = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getDashboardValues?DISTRICT=${district}`);
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getDashboardValues?DISTRICT=${district}`);
       const json = await response.json();
-      //console.log(json);
       setDashboardData({...json});
       
       // Setting Gauge Value
@@ -418,7 +421,6 @@ export default function Dashboard() {
       const completionValue = ['Completion',parseInt((json.completionCount/json.totalRecordCount) * 100)]
 
       setGaugeValue([...gaugeInitialValue,inaugrationValue,completionValue])
-      //console.log(36,[...gaugeInitialValue,inaugrationValue,completionValue]);
 
       const initialPieValue = [["Task", "Hours per Day"]];
 
@@ -426,7 +428,6 @@ export default function Dashboard() {
         initialPieValue.push([values.TALUKA,values.count])
       })
 
-      //console.log([...initialPieValue]);
       setPieValue([...initialPieValue]);
 
       const stackedBarChartValue = json.stackedBarChart;
@@ -458,10 +459,8 @@ export default function Dashboard() {
 
   const fetchMapMarkerLocations = async() =>{
     try{
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/getAllLocationForDistricts?DISTRICT=${district}`);
-      const json = await response.json();
-      ////console.log(json);
-      
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getAllLocationForDistricts?DISTRICT=${district}`);
+      const json = await response.json();      
       if(json.code === 200){
         setmapMarkerList([...json.data])
       }
@@ -472,36 +471,38 @@ export default function Dashboard() {
 
   const fetchPicklistValues = async() =>{
     try{
-      const response = await fetch('https://rainwaterharvesting-backend.onrender.com/getPicklistValues');
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getPicklistValues`);
       const data = await response.json();
-      setPicklistData(data.data);
       dispatch(addPicklistValues(data.data));
 
-      const districtValues = [...new Set(data.data.map(item => item.DISTRICT))];
-
- 
-      const assignedDistrict = district.length > 0 ? district : 'Surat'; 
-      const filteredTalukas = data.data.filter((data)=>{
-        return data.DISTRICT === assignedDistrict
-      });
+      // const districtValues = [...new Set(data.data.map(item => item.DISTRICT))]; 
+      // const assignedDistrict = district.length > 0 ? district : 'Surat'; 
+      // const filteredTalukas = data.data.filter((data)=>{
+      //   return data.DISTRICT === assignedDistrict
+      // });
     
-      const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
-        //console.log(370,talukaValues);
-      await localStorage.setItem('Talukas',talukaValues.toString());
-
-      setPicklistValues((prev)=>({
-        ...prev,
-        district: [...districtValues],
-        taluka: [...talukaValues]
-      }));
+      // const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
     }catch(error){
+      throw error;
+    }
+  }
+
+  const fetchDistrictPicklistValues = async() =>{
+    try{
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getDistricts`);
+      const data = await response.json();
+      if(data.code === 200){
+        const districts = data.data.filter((district) => district.DISTRICT).map((district)=> district.DISTRICT);
+        setDistrictPicklistValues([...districts]);
+      }
+    }
+    catch(error){
       throw error;
     }
   }
 
   const navigateToRecordCreation = async() =>{
     const user = await localStorage.getItem('authToken') || await localStorage.getItem('userData');
-    //console.log(386,user)
     if(user){
       navigate('/create');
       return
@@ -511,7 +512,7 @@ export default function Dashboard() {
 
   const updateRecords = async (updatedRecord) => {
     try {
-      const response = await fetch(`https://rainwaterharvesting-backend.onrender.com/updateRecords`, {
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/updateRecords`, {
         method: 'POST', // or 'PUT' if you're updating existing records
         headers: {
           'Content-Type': 'application/json',
@@ -530,46 +531,42 @@ export default function Dashboard() {
   };
 
 
-  const handleDistrictChange = (e) => {
+  const handleDistrictChange = async (e) => {    
+    try{
+      setDistrict(e);
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getTalukas?District=${e}`);
+      const responseData = await response.json();
+      if(responseData.code === 200){
+        const talukas = responseData.data.filter((taluka) => taluka.TALUKA).map((taluka)=> taluka.TALUKA);
+        console.log(539,talukas);
+        setTalukaPicklistValues([...talukas]);
+      }
+    }
+    catch(error){
+      throw error;
+    }
     const selectedDistrict = e;
-    // setSelectedCity(selectedDistrict)
     setDistrict(selectedDistrict);
-
-    const filteredTalukas = picklistData.filter((data)=>{
-      return data.DISTRICT === selectedDistrict
-    });
-
-    const talukaValues = [...new Set(filteredTalukas.map(item => item.TALUKA))];
-    //console.log(423, talukaValues);
-
-
-    setPicklistValues({...picklistValues,taluka:[...talukaValues]});
+    
   }
 
-  const handleTalukaChange = (taluka,district) => {
-    const selectedTaluka = taluka;
-    console.log(118,taluka,district);
-    setTaluka(taluka);
-    setDistrict(district)
-    const unfilteredPicklistValues = picklistValues && picklistValues.length > 0 ? picklistValues :masterPicklistValues
-    const filteredVillages = unfilteredPicklistValues.filter((data) => {
-      
-      const normalizedDataDistrict = data.DISTRICT.trim().toLowerCase();
-      const normalizedFilterDistrict = district.trim().toLowerCase();
-
-      return data.TALUKA.trim().toLowerCase() === selectedTaluka.trim().toLowerCase() && normalizedDataDistrict === normalizedFilterDistrict;
-    });
-
-    
-    const villageValues = [...new Set(filteredVillages.map(item => item.VILLAGE))];
-    //console.log(460,villageValues)
-    setPicklistValues({ ...picklistValues, village: villageValues });
+  const handleTalukaChange = async(e) => {
+    try{
+      setTaluka(e);
+      const response = await fetch(`https://rainwaterharvesting-backend-1.onrender.com/getVillages?Taluka=${e}`);
+      const responseData = await response.json();
+      if(responseData.code === 200){
+        const villages = responseData.data.filter((village)=> village.VILLAGE).map((village)=> village.VILLAGE);
+        setVillagePicklistValues([...villages])
+      }
+    }
+    catch(error){
+      throw error
+    }
   };
   
 
   const processRowUpdate = (newRow, oldRow) => {
-
-    //console.log('Row updated:', newRow);
 
     const rowsToUpdate = {
       ID: newRow.id,
@@ -582,16 +579,13 @@ export default function Dashboard() {
       COMPLETED_DATE: newRow.completionDate, // Maps to English Grant
       COMPLETED_PHOTO1: newRow.completionPhoto || null, // If labour exists, otherwise null
       IMPLIMANTATION_AUTHORITY: newRow.implementationAuthority || null, // If authority exists, otherwise null
-      // Add any other fields that might be needed from the original object
     }
-    //console.log(296,rowsToUpdate);
     updateRecords(rowsToUpdate);
     
     return newRow;
   };
 
   const handleMarkerClick = (index) => {
-    //console.log(276,index);
     setActiveMarker(index);
   };
 
@@ -609,7 +603,7 @@ export default function Dashboard() {
 
       if(userData.taluka){
         console.log(613)
-        handleTalukaChange(userData.taluka,userData.district)
+        handleTalukaChange(userData.taluka)
       }
       return;
     }
@@ -897,7 +891,7 @@ export default function Dashboard() {
             </div>
             <div className="row">
                   {
-                    !isTalukaAssignedToUser ? 
+                    !isDistrictAssignedToUser ? 
                       <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-4">
                         <select
                           value={district}
@@ -906,7 +900,7 @@ export default function Dashboard() {
                           }}
                         >
                           <option value={null}>Select District</option>
-                          {picklistValues.district.map((district, index) => (
+                          {districtPicklistValues.map((district, index) => (
                             <option key={index} value={district}>
                               {district}
                             </option>
@@ -924,11 +918,11 @@ export default function Dashboard() {
                       <select
                         value={taluka}
                         onChange={(e) => {
-                          handleTalukaChange(e.target.value,district);
+                          handleTalukaChange(e.target.value);
                         }}
                       >
                         <option value=''>Select Taluka</option>
-                        {picklistValues.taluka.map((taluka, index) => (
+                        {talukaPicklistValues.map((taluka, index) => (
                           <option key={index} value={taluka}>
                             {taluka}
                           </option>
@@ -948,7 +942,7 @@ export default function Dashboard() {
                       }}
                     >
                       <option value=''>Select Village</option>
-                      {picklistValues.village.map((village, index) => (
+                      {villagePicklistValues.map((village, index) => (
                         <option key={index} value={village}>
                           {village}
                         </option>
