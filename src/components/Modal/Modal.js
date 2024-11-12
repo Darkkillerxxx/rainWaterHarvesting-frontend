@@ -283,7 +283,7 @@ const formatDate = (date) => {
 
             {/* Inauguration Photo */}
             {
-              formData.canEdit ? 
+              rowData.canEdit ? 
               <Form.Group controlId="inaugurationPhoto" style={{ marginBottom: 10 }}>
                 <Form.Label>Start Work Photo</Form.Label>
                 <Form.Control
@@ -320,7 +320,7 @@ const formatDate = (date) => {
             </Form.Group>
 
             {
-              formData.canEdit ? 
+              rowData.canEdit ? 
               <Form.Group controlId="completionPhoto" style={{ marginBottom: 10 }}>
                 <Form.Label>Completion Photo</Form.Label>
                 <Form.Control type="file" name="completionPhoto" onChange={handleChange} />
@@ -340,14 +340,15 @@ const formatDate = (date) => {
             {/* Completion Photo */}
             
             {
-              formData.canEdit ? 
+              rowData.canEdit ? 
                 <button className='btn btn-primary w-50 mb-3' onClick={handleLocationCapture}>Update Location</button>
                 :
                 null
             }
             {/* Submit Button */}
+            {console.log(349,)}
             {
-              formData.canEdit ? 
+              rowData.canEdit ? 
                 <Button variant="primary" type="submit">
                   Submit
                 </Button>
