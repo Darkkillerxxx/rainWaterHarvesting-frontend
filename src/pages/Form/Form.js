@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import "./Form.css";
 import {DotLoader, BeatLoader} from "react-spinners";
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from "react-router-dom";
 
 
 const override = {
@@ -13,6 +14,7 @@ const override = {
 };
 
 const Form = () => {
+  const navigate = useNavigate();
   const items = useSelector((state) => state.items.picklistValues);
   console.log(17,items);
   const location = useLocation();
@@ -184,6 +186,7 @@ const Form = () => {
     })
     if(res){
       alert("Successfully added to the table");
+      navigate('/');
       console.log("Successfully added to the table\nRes:", res);
     }
 
@@ -346,7 +349,7 @@ const Form = () => {
               />
             )}
           </div> */}
-          <button type="submit">
+          <button type="submit" >
           {
             isLoading ? 
               <BeatLoader 
