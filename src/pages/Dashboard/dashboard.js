@@ -85,8 +85,9 @@ export default function Dashboard() {
           size="small"
           onClick={() => 
           {
-            console.log(88,((parseInt(params.row.createdByUserId) === id) || isAdmin))
-            handleEditClick(params.row,((parseInt(params.row.createdByUserId) === id) || isAdmin));
+            console.log(85,id,parseInt(params.row.createdByUserId,),"Hello")
+            handleEditClick(params.row,parseInt(params.row.createdByUserId) === id);
+            
           }
         }
         >
