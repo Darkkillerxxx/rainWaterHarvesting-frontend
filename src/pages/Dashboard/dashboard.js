@@ -85,8 +85,9 @@ export default function Dashboard() {
           size="small"
           onClick={() => 
           {
-            console.log(85,id,parseInt(params.row.createdByUserId))
+            console.log(85,id,parseInt(params.row.createdByUserId,),"Hello")
             handleEditClick(params.row,parseInt(params.row.createdByUserId) === id);
+            
           }
         }
         >

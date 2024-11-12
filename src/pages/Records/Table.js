@@ -86,7 +86,7 @@ export default function FilteredTable() {
   const updateRecordInTable = async(item) => {
     const isAuth = await localStorage.getItem('token');
     if(!isAuth){
-      navigate("/login");
+      navigate("/login"); 
       return;
     }
     navigate("/create", { state: { item } });
