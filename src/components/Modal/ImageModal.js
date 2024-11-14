@@ -16,7 +16,7 @@ const ImageModal = ({selectedImage, onHandleClose }) => {
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                // objectFit: 'cover',
                 position: 'absolute', // Ensures it takes up the full space
                 top: 0,
                 left: 0
@@ -25,7 +25,13 @@ const ImageModal = ({selectedImage, onHandleClose }) => {
               alt="Selected Preview"
               fluid
             />
+            
           )}
+          {
+            selectedImage && (
+              <div>Address : </div>
+            )
+          }
         </div>
       </Modal.Body>
       <Modal.Footer>

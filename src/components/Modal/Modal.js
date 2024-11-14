@@ -345,6 +345,12 @@ const formatDate = (date) => {
                 :
                 null
             }
+            {
+              rowData.canEdit ? 
+              <div style={{fontWeight:'500'}}>Latitude : {location.latitude }  , Longitude : {location.longitude}</div>
+              :
+              null
+            }
             {/* Submit Button */}
             {console.log(349,)}
             {
